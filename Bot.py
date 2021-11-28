@@ -4,7 +4,7 @@ from Trader import Trader
 from datetime import datetime
 from SaveResults import save
 from Binance import Binance
-from configuration import *
+from Config import *
 
 class Bot:
     def __init__(self):

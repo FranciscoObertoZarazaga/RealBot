@@ -2,7 +2,7 @@ import time
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
-from configuration import *
+from Config import *
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
