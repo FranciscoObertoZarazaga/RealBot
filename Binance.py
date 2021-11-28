@@ -2,6 +2,7 @@ import time
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
+from configuration import *
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -130,8 +131,8 @@ class WebSocketBinance:
     def notify(self,data):
         for observer in self.observers: observer.update(data)
 
-    def add(self,symbol,interval):
-        self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=symbol,interval=interval)
+    def run(self):
+        self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
         self.ws.join()
 
     def stop(self):

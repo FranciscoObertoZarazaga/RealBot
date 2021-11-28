@@ -4,14 +4,14 @@ from Trader import Trader
 from datetime import datetime
 from SaveResults import save
 from Binance import Binance
+from configuration import *
 
 class Bot:
-    def __init__(self, asset, symbol, interval, is_real_trader):
-        self.symbol = symbol
-        self.kl = Klines(symbol, interval)
-        self.trader = Trader(symbol,is_real_trader)
+    def __init__(self):
+        self.kl = Klines(SYMBOL, INTERVAL)
+        self.trader = Trader(SYMBOL,IS_REAL_TRADER)
         self.binance = Binance()
-        self.indoor = True if self.binance.getCrypto(asset) * self.binance.get_price(self.symbol)[0] > self.binance.getusdt() else None
+        self.indoor = True if self.binance.getCrypto(ASSET) * self.binance.get_price(SYMBOL)[0] > self.binance.getusdt() else None
 
     def run(self):
         self.kl.load()
@@ -24,9 +24,10 @@ class Bot:
             self.trader.buy()
             self.indoor = True
             print('Compra')
-        elif points < 0 and indoor:
+        if points < 0 and indoor:
             self.trader.sell()
             self.indoor = False
+            save(self.trader)
             print('Vende')
         open('state', 'w').write(f'ACTIVO: {datetime.now().strftime("%H:%M %d-%m-%Y")}')
 
