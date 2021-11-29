@@ -1,41 +1,26 @@
 from Bot import Bot
-
+from Telegram import BotTelegram
+from Tester import Tester
 from Binance import WebSocketBinance
 from time import sleep
 import threading
 import warnings
 warnings.filterwarnings("ignore")
 
+tester = Tester()
+telegram = BotTelegram(tester)
 
-
-bot = Bot()
+bot = Bot(telegram, tester)
 ws = WebSocketBinance()
 ws.subscribe(bot)
-ws.run()
 
+threads = list()
+threads.append(threading.Thread(target=ws.run, name='bot'))
+threads.append(threading.Thread(target=telegram.start))
 
-'''
-while True:
-    kl.load()
-    kline = kl.getKlines()
-    print(kline)
-    points = 0
-    points += WinStrategy(kline,)
+for thread in threads:
+    thread.start()
 
-    if points > 0:
-        trader.buy()
-        print('Compra')
-        notify('Comprá')
-    elif points < 0:
-        trader.sell()
-        print('Vende')
-        notify('Vendé')
-    open('state','w').write(f'ACTIVO: {datetime.now().strftime("%H:%M %d-%m-%Y")}')
-    trader.wait()
-
-
-
-
-'''
-
+for thread in threads:
+    thread.join()
 
