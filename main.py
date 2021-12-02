@@ -16,7 +16,7 @@ ws.subscribe(bot)
 
 threads = list()
 threads.append(threading.Thread(target=ws.run, name='bot'))
-threads.append(threading.Thread(target=telegram.start))
+threads.append(threading.Thread(target=telegram.start, daemon=True))
 
 for thread in threads:
     thread.start()

@@ -63,32 +63,19 @@ class Binance:
 
     def buy(self,symbol):
         try:
-            info = self.client.get_symbol_info(symbol)
-            stepSize = float(info['filters'][2]['stepSize'])
-            precision = info['baseAssetPrecision']
+            minNotional = self.getMinNotional(symbol)
             usdt = self.getusdt()
-            price, _ = self.get_price(symbol)
-            crypto = usdt/price
-            quantity = round(crypto - crypto % stepSize, precision)
-            if quantity > 0 and quantity < 9000:
-                self.client.order_market_buy(symbol=symbol,quantity=quantity)
-            else:
-                print(f'No se pudo comprar en el mercado {symbol}, la cantidad está fuera de los límites establecidos.')
+            if usdt >= minNotional:
+                return self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
         except Exception as e:
             print(e)
-            self.buy(symbol)
+            return self.buy(symbol)
 
     def sell(self,symbol):
         try:
             crypto = self.getbtc()
-            info = self.client.get_symbol_info(symbol)
-            stepSize = float(info['filters'][2]['stepSize'])
-            precision = info['baseAssetPrecision']
-            quantity = round(crypto - crypto % stepSize, precision)
-            if quantity > 0 and quantity < 9000:
-                self.client.order_market_sell(symbol=symbol, quantity=quantity)
-            else:
-                print(f'No se pudo vender en el mercado {symbol}, la cantidad está fuera de los límites establecidos.')
+            if crypto > 0:
+                self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
         except Exception as e:
             print(e)
             self.sell(symbol)
@@ -116,6 +103,17 @@ class Binance:
 
     def getTime(self):
         return datetime.fromtimestamp(self.client.get_server_time()['serverTime'] / 1000).strftime('%H:%M %d-%m-%Y')
+
+    def getFilters(self,symbol):
+        return self.client.get_symbol_info(symbol=symbol)['filters']
+
+    def getMinNotional(self,symbol):
+        minNotional = None
+        filters = self.getFilters(symbol)
+        for filter in filters:
+            if filter['filterType'] == 'MIN_NOTIONAL':
+                minNotional = filter['minNotional']
+        return minNotional
 
 
 class WebSocketBinance:
