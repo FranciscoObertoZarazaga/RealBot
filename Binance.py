@@ -65,6 +65,7 @@ class Binance:
         try:
             minNotional = self.getMinNotional(symbol)
             usdt = self.getusdt()
+            print(usdt,minNotional)
             if usdt >= minNotional:
                 return self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
         except Exception as e:
@@ -114,7 +115,7 @@ class Binance:
         for filter in filters:
             if filter['filterType'] == 'MIN_NOTIONAL':
                 minNotional = filter['minNotional']
-        return minNotional
+        return float(minNotional)
 
     def getMinQty(self,symbol):
         minQty = None
@@ -122,7 +123,7 @@ class Binance:
         for filter in filters:
             if filter['filterType'] == 'LOT_SIZE':
                 minQty = filter['minQty']
-        return minQty
+        return float(minQty)
 
 
 class WebSocketBinance:
