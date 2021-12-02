@@ -9,23 +9,14 @@ class Trader:
         self.symbol = symbol
 
     def buy(self):
-        if self.wallet.isPayable():
-            self.wallet.pay()
+        self.wallet.pay()
 
 
     def sell(self):
-        if self.wallet.isCollectible():
-            reward = self.wallet.collect()
-            self.indoor = False
+        self.wallet.collect()
 
     def wait(self):
         time.sleep(10)
-
-    def switch(self):
-        try:
-            return self.buy()
-        except:
-            return self.sell()
 
     def __str__(self):
         return str(self.wallet)

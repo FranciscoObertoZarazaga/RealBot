@@ -78,14 +78,17 @@ class Wallet:
                  'sell_time': sell_time}
         self.trades = self.trades.append(trade, ignore_index=True, )
 
-class RealWallet(Wallet):
+class RealWallet:
     def __init__(self, symbol):
-        super(RealWallet, self).__init__(symbol)
+        self.symbol = symbol
         self.binance = Binance()
-        self.asset = self.symbol.replace('USDT','')
-        self.initial_amount = self.binance.getusdt()
-        self.usdt = self.initial_amount
 
+    def pay(self):
+        info = self.binance.buy(self.symbol)
+
+    def collect(self):
+        info = self.binance.sell(self.symbol)
+'''
     def pay(self, percentage=1):
         assert self.usdt > 0
         self.buy_amount = self.usdt
@@ -106,7 +109,10 @@ class RealWallet(Wallet):
         self.buy_amount = 0
         self.updateWallet()
         return self.reward
-
+        
     def updateWallet(self):
         self.usdt = self.binance.getusdt()
         self.crypto = self.binance.getCrypto(self.asset)
+'''
+
+

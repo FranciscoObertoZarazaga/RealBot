@@ -73,8 +73,9 @@ class Binance:
 
     def sell(self,symbol):
         try:
+            minQty = self.getMinQty(symbol)
             crypto = self.getbtc()
-            if crypto > 0:
+            if crypto >= minQty:
                 return self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
         except Exception as e:
             print(e)
@@ -114,6 +115,14 @@ class Binance:
             if filter['filterType'] == 'MIN_NOTIONAL':
                 minNotional = filter['minNotional']
         return minNotional
+
+    def getMinQty(self,symbol):
+        minQty = None
+        filters = self.getFilters(symbol)
+        for filter in filters:
+            if filter['filterType'] == 'LOT_SIZE':
+                minQty = filter['minQty']
+        return minQty
 
 
 class WebSocketBinance:
