@@ -1,22 +1,16 @@
-from Bot import Bot
-from Telegram import BotTelegram
-from Tester import Tester
-from Binance import WebSocketBinance
+from Binance import WS
+from Telegram import TELEGRAM
+from Bot import BOT
 from time import sleep
 import threading
 import warnings
 warnings.filterwarnings("ignore")
 
-tester = Tester()
-telegram = BotTelegram(tester)
-
-bot = Bot(telegram, tester)
-ws = WebSocketBinance()
-ws.subscribe(bot)
+WS.subscribe(BOT)
 
 threads = list()
-threads.append(threading.Thread(target=ws.run, name='bot'))
-threads.append(threading.Thread(target=telegram.start, daemon=True))
+threads.append(threading.Thread(target=WS.run, name='bot'))
+threads.append(threading.Thread(target=TELEGRAM.start, daemon=True))
 
 for thread in threads:
     thread.start()

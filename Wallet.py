@@ -17,26 +17,10 @@ class Wallet:
         self.trades = pd.DataFrame()
 
     def pay(self, percentage=1):
-        amount = self.usdt * percentage
-        assert self.usdt >= amount
-        self.buy_amount += amount
-        self.buy_time = self.binance.getTime()
-        self.buy_price, _ = self.binance.get_price(self.symbol)
-        self.crypto += (amount * 0.999) / self.buy_price
-        self.usdt -= amount
+        print('Compra')
 
     def collect(self):
-        assert self.crypto > 0
-        _, sell_price = self.binance.get_price(self.symbol)
-        reward = self.crypto * sell_price * 0.999 - self.buy_amount
-        self.usdt += reward + self.buy_amount
-        self.reward += reward
-        time = self.binance.getTime()
-        self.loss += reward if reward < 0 else 0
-        self.saveTrade(reward, sell_price, time)
-        self.crypto = 0
-        self.buy_amount = 0
-        return self.reward
+        print('Venta')
 
     def __str__(self):
         trades = self.trades
@@ -88,31 +72,4 @@ class RealWallet:
 
     def collect(self):
         info = self.binance.sell(self.symbol)
-'''
-    def pay(self, percentage=1):
-        assert self.usdt > 0
-        self.buy_amount = self.usdt
-        self.buy_price, _ = self.binance.get_price(self.symbol)
-        self.binance.buy(self.symbol)
-        self.buy_time = self.binance.getTime()
-        self.updateWallet()
-
-    def collect(self):
-        assert self.crypto > 0
-        _, sell_price = self.binance.get_price(self.symbol)
-        reward = self.crypto * sell_price * 0.999 - self.buy_amount
-        self.binance.sell(self.symbol)
-        time = self.binance.getTime()
-        self.reward += reward
-        self.loss += reward if reward < 0 else 0
-        self.saveTrade(reward, sell_price, time)
-        self.buy_amount = 0
-        self.updateWallet()
-        return self.reward
-        
-    def updateWallet(self):
-        self.usdt = self.binance.getusdt()
-        self.crypto = self.binance.getCrypto(self.asset)
-'''
-
 

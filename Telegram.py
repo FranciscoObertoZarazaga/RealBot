@@ -7,15 +7,13 @@ CHAT_ID = [2004536384, 1369437188]
 
 
 class BotTelegram:
-    def __init__(self, tester):
+    def __init__(self):
         self.updater = Updater(TOKEN)
         self.dispatcher = self.updater.dispatcher
 
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
         self.dispatcher.add_handler(CommandHandler('help', self.help))
-
-        self.tester = tester
 
     def start(self):
         self.updater.start_polling()
@@ -27,7 +25,7 @@ class BotTelegram:
         update.message.reply_text(update.message.text)
 
     def state(self, update: Update, context: CallbackContext) -> None:
-        state = self.tester.test()
+        state = TESTER.test()
         update.message.reply_text(state)
 
     def help(self, update: Update, context: CallbackContext) -> None:
@@ -41,3 +39,5 @@ class BotTelegram:
     def stadistics(self):
         pass
 
+
+TELEGRAM = BotTelegram()

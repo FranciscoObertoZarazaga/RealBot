@@ -2,7 +2,7 @@ import time
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
-from Config import *
+from Config import SYMBOL, INTERVAL
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -67,7 +67,9 @@ class Binance:
             usdt = self.getusdt()
             print(usdt,minNotional)
             if usdt >= minNotional:
-                return self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
+                info = self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
+                self.telegram.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+                return info
         except Exception as e:
             print(e)
             return self.buy(symbol)
@@ -77,7 +79,9 @@ class Binance:
             minQty = self.getMinQty(symbol)
             crypto = self.getbtc()
             if crypto >= minQty:
-                return self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
+                info = self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
+                self.telegram.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+                return info
         except Exception as e:
             print(e)
             return self.sell(symbol)
@@ -144,6 +148,10 @@ class WebSocketBinance:
         self.ws.join()
 
     def stop(self):
-        assert self.kline_socket != None
+        assert self.kline_socket is not None
         self.ws.stop_socket(self.kline_socket)
+
+
+WS = WebSocketBinance()
+
 

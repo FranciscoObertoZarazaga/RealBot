@@ -2,17 +2,15 @@ from Klines import Klines
 from Strategy import *
 from Trader import Trader
 from datetime import datetime
-from SaveResults import save
 from Binance import Binance
-from Config import *
+from Config import SYMBOL, INTERVAL, IS_REAL_TRADER
+from Tester import TESTER
 
 class Bot:
-    def __init__(self,telegram, tester):
+    def __init__(self):
         self.kl = Klines(SYMBOL, INTERVAL)
         self.trader = Trader(SYMBOL,IS_REAL_TRADER)
         self.binance = Binance()
-        self.telegram = telegram
-        self.tester = tester
 
     def run(self):
         self.kl.load()
@@ -22,12 +20,12 @@ class Bot:
 
         if points > 0:
             self.trader.buy()
-            self.telegram.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
         if points < 0:
             self.trader.sell()
-            save(self.trader)
-            self.telegram.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
-        self.tester.setLastActivity(datetime.now().strftime("%H:%M %d-%m-%Y"))
+        TESTER.setLastActivity(datetime.now().strftime("%H:%M %d-%m-%Y"))
 
     def update(self, _):
         self.run()
+
+
+BOT = Bot()
