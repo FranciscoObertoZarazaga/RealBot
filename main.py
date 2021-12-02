@@ -1,7 +1,6 @@
 from Binance import WS
 from Telegram import TELEGRAM
 from Bot import BOT
-from time import sleep
 import threading
 import warnings
 warnings.filterwarnings("ignore")

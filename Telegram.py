@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import Updater, MessageHandler, CommandHandler, Filters, CallbackContext
 import threading
+from Tester import TESTER
 
 TOKEN = '2128072171:AAEjPPOqS_ICrRJ2HudLNgBgsqhI6HtdRnI'
 CHAT_ID = [2004536384, 1369437188]

@@ -3,6 +3,7 @@ from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
 from Config import SYMBOL, INTERVAL
+from Telegram import TELEGRAM
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -68,7 +69,7 @@ class Binance:
             print(usdt,minNotional)
             if usdt >= minNotional:
                 info = self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
-                self.telegram.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+                TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
                 return info
         except Exception as e:
             print(e)
@@ -80,7 +81,7 @@ class Binance:
             crypto = self.getbtc()
             if crypto >= minQty:
                 info = self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
-                self.telegram.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+                TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
                 return info
         except Exception as e:
             print(e)
