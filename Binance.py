@@ -75,10 +75,10 @@ class Binance:
         try:
             crypto = self.getbtc()
             if crypto > 0:
-                self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
+                return self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
         except Exception as e:
             print(e)
-            self.sell(symbol)
+            return self.sell(symbol)
 
     def getusdt(self):
         return self.getCrypto('USDT')
