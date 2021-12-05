@@ -4,8 +4,6 @@ from Tester import TESTER
 from DataBase import DATABASE
 
 TOKEN = '2128072171:AAEjPPOqS_ICrRJ2HudLNgBgsqhI6HtdRnI'
-CHAT_ID = [2004536384, 1369437188]
-
 
 class BotTelegram:
     def __init__(self):
@@ -16,6 +14,10 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
         self.dispatcher.add_handler(CommandHandler('help', self.help))
+
+        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.broadcast))
+
+        self.users = self.get_all_users()
 
     def start(self):
         self.updater.start_polling()
@@ -32,13 +34,20 @@ class BotTelegram:
 
     def save_id(self, update: Update, context: CallbackContext) -> None:
         new_id = str(update.message.chat.id)
-        data = DATABASE.select('telegram')
         registred = False
-        for id in data:
+        for id in self.users:
             if id == new_id:
                 registred = True
         if not registred:
             DATABASE.insert('telegram', 'code', new_id)
+            self.users = self.get_all_users()
+
+    def get_all_users(self):
+        users = list()
+        data = DATABASE.select('telegram')
+        for user in data:
+            users.append(user[1])
+        return users
 
 
     def help(self, update: Update, context: CallbackContext) -> None:
@@ -46,8 +55,13 @@ class BotTelegram:
         update.message.reply_text(comands)
 
     def notify(self, msg):
-        for id in CHAT_ID:
+        for id in self.users:
             self.updater.bot.send_message(id, msg)
+
+    def broadcast(self, update: Update, context: CallbackContext) -> None:
+        id = update.message.chat.id
+        if id == 1369437188:
+            self.notify(update.message.text)
 
     def stadistics(self):
         pass
