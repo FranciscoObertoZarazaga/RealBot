@@ -1,15 +1,12 @@
-import pandas as pd
 from datetime import datetime
-from Binance import Binance
+from Binance import BINANCE
 from SqueezeMomentumIndicator import SqueezeMomentumIndicator
 from Indicator import *
+from Config import SYMBOL, INTERVAL
 
 class Klines:
-    def __init__(self,symbol,interval):
-        self.binance = Binance()
+    def __init__(self):
         self.klines = pd.DataFrame()
-        self.symbol = symbol
-        self.interval = interval
 
     def load(self,):
         self._download()
@@ -23,7 +20,7 @@ class Klines:
 
     def _download(self):
         colums, times = ['Time','Open','High','Low','Close','Volume','ignore','ignore','ignore','ignore','ignore','ignore'], list()
-        self.klines = pd.DataFrame(self.binance.get_k_lines(symbol=self.symbol,interval=self.interval,limit=41),columns=colums)
+        self.klines = pd.DataFrame(BINANCE.get_k_lines(symbol=SYMBOL,interval=INTERVAL,limit=41),columns=colums)
         self.klines['times'] = self.klines['Time']
         [times.append(datetime.fromtimestamp(int(str(time))/1000).strftime('%H:%M %d-%m-%Y')) for time in self.klines['Time']]
         self.klines['Time'] = times

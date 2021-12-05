@@ -2,6 +2,7 @@ import time
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
+from Observed import Observed
 from Config import SYMBOL, INTERVAL
 from Telegram import TELEGRAM
 
@@ -10,8 +11,11 @@ SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
 
 class Binance:
 
-    def __init__(self):
-        self.client = Client(API_KEY, SECRET_KEY)
+    def __init__(self, api_key=API_KEY, secret_key=SECRET_KEY):
+        self.client = Client(api_key, secret_key)
+
+    def __del__(self):
+        print('Binance eliminado')
 
     def getAllTickers(self):
         return self.client.get_all_tickers()
@@ -131,18 +135,12 @@ class Binance:
         return float(minQty)
 
 
-class WebSocketBinance:
+class WebSocketBinance(Observed):
     def __init__(self):
+        super(WebSocketBinance, self).__init__()
         self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
         self.ws.start()
-        self.observers = list()
         self.kline_socket = None
-
-    def subscribe(self,observer):
-        self.observers.append(observer)
-
-    def notify(self,data):
-        for observer in self.observers: observer.update(data)
 
     def run(self):
         self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
@@ -153,6 +151,7 @@ class WebSocketBinance:
         self.ws.stop_socket(self.kline_socket)
 
 
+BINANCE = Binance()
 WS = WebSocketBinance()
 
 

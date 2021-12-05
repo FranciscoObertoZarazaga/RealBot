@@ -18,6 +18,9 @@ class Tester:
         diagnostic += f'Last update: {self.last_activity}'
         return diagnostic
 
+    def update(self, msg):
+        self.setLastActivity(msg)
+
 
 TESTER = Tester()
 

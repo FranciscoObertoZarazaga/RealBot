@@ -1,16 +1,14 @@
 from Klines import Klines
 from Strategy import *
-from Trader import Trader
+from Trader import TRADERS
 from datetime import datetime
-from Binance import Binance
-from Config import SYMBOL, INTERVAL, IS_REAL_TRADER
-from Tester import TESTER
+from Observed import Observed
+from threading import Thread
 
-class Bot:
+class Bot(Observed):
     def __init__(self):
-        self.kl = Klines(SYMBOL, INTERVAL)
-        self.trader = Trader(SYMBOL,IS_REAL_TRADER)
-        self.binance = Binance()
+        super(Bot, self).__init__()
+        self.kl = Klines()
 
     def run(self):
         self.kl.load()
@@ -19,13 +17,27 @@ class Bot:
         points += WinStrategy(kline)
 
         if points > 0:
-            self.trader.buy()
+            self.all_buy()
         if points < 0:
-            self.trader.sell()
-        TESTER.setLastActivity(datetime.now().strftime("%H:%M %d-%m-%Y"))
+            self.all_sell()
+        self.notify(datetime.now().strftime("%H:%M %d-%m-%Y"))
 
     def update(self, _):
         self.run()
+
+    def all_buy(self):
+        buy_threads = list()
+        for trader in TRADERS:
+            buy_threads.append(Thread(target=trader.buy))
+        for thread in buy_threads:
+            thread.start()
+
+    def all_sell(self):
+        sell_threads = list()
+        for trader in TRADERS:
+            sell_threads.append(Thread(target=trader.sell()))
+        for thread in sell_threads:
+            thread.start()
 
 
 BOT = Bot()
