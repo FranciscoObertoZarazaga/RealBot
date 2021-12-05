@@ -31,7 +31,7 @@ class BotTelegram:
         update.message.reply_text(state)
 
     def save_id(self, update: Update, context: CallbackContext) -> None:
-        new_id = update.message.chat.id
+        new_id = str(update.message.chat.id)
         data = DATABASE.select('telegram')
         registred = False
         for id in data:
