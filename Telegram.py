@@ -65,7 +65,7 @@ class BotTelegram:
         if id == 1369437188:
             for user in self.users:
                 if user != 1369437188:
-                    self.updater.bot.send_message(id, update.message.text)
+                    self.updater.bot.send_message(user, update.message.text)
 
     def stadistics(self):
         pass
