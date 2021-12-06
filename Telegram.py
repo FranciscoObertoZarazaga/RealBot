@@ -16,7 +16,7 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('help', self.help))
         self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
 
-        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.echo))
+        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.broadcast))
 
         self.users = self.get_all_users()
 
