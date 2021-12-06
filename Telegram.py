@@ -14,8 +14,9 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
         self.dispatcher.add_handler(CommandHandler('help', self.help))
+        self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
 
-        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.broadcast))
+        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.echo))
 
         self.users = self.get_all_users()
 
@@ -33,8 +34,9 @@ class BotTelegram:
         update.message.reply_text(state)
 
     def save_id(self, update: Update, context: CallbackContext) -> None:
-        new_id = str(update.message.chat.id)
+        new_id = update.message.chat.id
         registred = False
+        self.help(update,context)
         for id in self.users:
             if id == new_id:
                 registred = True
@@ -51,7 +53,7 @@ class BotTelegram:
 
 
     def help(self, update: Update, context: CallbackContext) -> None:
-        comands = 'Comands:\n /state\n /help'
+        comands = 'Comands:\n /start\n /state\n /help'
         update.message.reply_text(comands)
 
     def notify(self, msg):
@@ -61,7 +63,9 @@ class BotTelegram:
     def broadcast(self, update: Update, context: CallbackContext) -> None:
         id = update.message.chat.id
         if id == 1369437188:
-            self.notify(update.message.text)
+            for id in self.users:
+                if id != 1369437188:
+                    self.notify(update.message.text)
 
     def stadistics(self):
         pass
