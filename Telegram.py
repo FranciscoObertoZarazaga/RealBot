@@ -63,9 +63,9 @@ class BotTelegram:
     def broadcast(self, update: Update, context: CallbackContext) -> None:
         id = update.message.chat.id
         if id == 1369437188:
-            for id in self.users:
-                if id != 1369437188:
-                    self.notify(update.message.text)
+            for user in self.users:
+                if user != 1369437188:
+                    self.updater.bot.send_message(id, update.message.text)
 
     def stadistics(self):
         pass
