@@ -10,7 +10,7 @@ class BotTelegram:
         self.updater = Updater(TOKEN)
         self.dispatcher = self.updater.dispatcher
 
-        self.dispatcher.add_handler(CommandHandler('start', self.save_id))
+        self.dispatcher.add_handler(CommandHandler('start', self.start))
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('stadistics', self.stadistics))
         self.dispatcher.add_handler(CommandHandler('help', self.help))
@@ -20,9 +20,12 @@ class BotTelegram:
 
         self.users = self.get_all_users()
 
-    def start(self):
+    def run(self):
         self.updater.start_polling()
         #self.updater.idle()
+
+    def stop(self):
+        self.updater.stop()
 
     def echo(self, update: Update, context: CallbackContext) -> None:
         """Echo the user message."""
@@ -30,10 +33,10 @@ class BotTelegram:
         update.message.reply_text(update.message.text)
 
     def state(self, update: Update, context: CallbackContext) -> None:
-        state = TESTER.test()
+        state = TESTER.test()['msg']
         update.message.reply_text(state)
 
-    def save_id(self, update: Update, context: CallbackContext) -> None:
+    def start(self, update: Update, context: CallbackContext) -> None:
         new_id = update.message.chat.id
         registred = False
         self.help(update,context)

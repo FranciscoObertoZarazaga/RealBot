@@ -1,11 +1,11 @@
 from Klines import Klines
 from Strategy import *
 from Trader import TRADERS
-from datetime import datetime
-from Observed import Observed
 from threading import Thread
+from Tester import TESTER
+from Telegram import TELEGRAM
 
-class Bot(Observed):
+class Bot:
     def __init__(self):
         super(Bot, self).__init__()
         self.kl = Klines()
@@ -20,12 +20,13 @@ class Bot(Observed):
             self.all_buy()
         if points < 0:
             self.all_sell()
-        self.notify(datetime.now().strftime("%H:%M %d-%m-%Y"))
+        TESTER.set_last_activity()
 
     def update(self, _):
         self.run()
 
     def all_buy(self):
+        TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
         buy_threads = list()
         for trader in TRADERS:
             buy_threads.append(Thread(target=trader.buy))
@@ -33,6 +34,7 @@ class Bot(Observed):
             thread.start()
 
     def all_sell(self):
+        TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
         sell_threads = list()
         for trader in TRADERS:
             sell_threads.append(Thread(target=trader.sell()))

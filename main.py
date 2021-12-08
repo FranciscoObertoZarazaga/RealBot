@@ -1,4 +1,5 @@
-from UserInterface import SOCKETIO, APP, USER_INTERFACE
+from Config import THREADS
+from UserInterface import SOCKETIO, APP
 from Binance import WS
 from Telegram import TELEGRAM
 from Bot import BOT
@@ -8,16 +9,16 @@ import warnings
 warnings.filterwarnings("ignore")
 
 WS.subscribe(BOT)
-BOT.subscribe([TESTER, USER_INTERFACE])
+TESTER.subscribe(SOCKETIO)
 
-threads = list()
-threads.append(Thread(target=WS.run, name='bot'))
-threads.append(Thread(target=TELEGRAM.start, daemon=True))
-#threads.append(Thread(target=SOCKETIO.run,kwargs={"app": APP},name='iu'))
+THREADS.update({'bot':Thread(target=WS.run, name='bot')})
+#THREADS.update({'telegram':Thread(target=TELEGRAM.run, daemon=True, name=telegram)})
+THREADS.update({'iu':Thread(target=SOCKETIO.run, kwargs={"app": APP}, name='iu')})
+THREADS.update({'tester':Thread(target=TESTER.run, name='tester')})
 
-for thread in threads:
+for thread in THREADS.values():
     thread.start()
 
-for thread in threads:
+for thread in THREADS.values():
     thread.join()
 
