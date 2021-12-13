@@ -4,6 +4,7 @@ from binance import ThreadedWebsocketManager
 from datetime import datetime
 from Observed import Observed
 from Config import SYMBOL, INTERVAL
+from Telegram import TELEGRAM
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -72,6 +73,7 @@ class Binance:
             print(usdt,minNotional)
             if usdt >= minNotional:
                 info = self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
+                TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
                 return info
         except Exception as e:
             print(e)
@@ -83,6 +85,7 @@ class Binance:
             crypto = self.getbtc()
             if crypto >= minQty:
                 info = self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
+                TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
                 return info
         except Exception as e:
             print(e)
@@ -139,16 +142,17 @@ class WebSocketBinance(Observed):
         self.kline_socket = None
 
     def run(self):
-        self.ws.start()
-        self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
-        self.ws.join()
+        if not self.ws.is_alive():
+            self.ws.start()
+            self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
+            self.ws.join()
 
     def stop(self):
-        print('stop')
-        assert self.kline_socket is not None
-        self.ws.stop_socket(self.kline_socket)
-        self.ws.stop()
-        self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
+        if self.ws.is_alive():
+            assert self.kline_socket is not None
+            self.ws.stop_socket(self.kline_socket)
+            self.ws.stop()
+            self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
 
     def restart(self):
         print('Reinicio de Bot-Websocket')

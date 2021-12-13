@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" type="text/css" href="../static/css/normalize.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/index.css">   
+  <link rel="stylesheet" type="text/css" href="../static/css/card.css">
+   <link rel="stylesheet" type="text/css" href="../static/css/switch.css">
+  
+
+</head>
+<body>
+  <section class="main">
+    {% block switch %}{% endblock %}
+
+    <div class="card">
+      <div class="card-side front">
+        <div>
+          <div id="state">
+            <iframe src="../static/html/loader.html" frameborder="0"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="card-side back">
+        <div>
+          {{tester.test()['test_ws']}}
+        </div>
+      </div>
+    </div>
+    
+
+  </section>
+
+  <script 
+    src="https://cdn.socket.io/4.4.0/socket.io.min.js" 
+    integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" 
+    crossorigin="anonymous">
+  </script>
+  <script src="../static/js/socketio.js"></script>
+</body>
+</html>

@@ -11,19 +11,16 @@ class Tester(Observed):
         self.last_activity = None
         self.is_runnable = True
 
-    def test_threads(self):
-        for thread in THREADS.values():
-            if not thread.is_alive():
-                return False
-        return True
+    def test_ws(self):
+        return THREADS['bot'].is_alive()
 
     def set_last_activity(self):
         self.last_activity = datetime.now().strftime("%H:%M %d-%m-%Y")
 
     def test(self):
-        test_threads = self.test_threads()
-        msg = f'State: {"On" if test_threads else "Off"}\nLast update: {self.last_activity}'
-        diagnostic = {'test_threads':test_threads, 'last_activity':self.last_activity, 'msg':msg}
+        test_ws = self.test_ws()
+        msg = f'State: {"On" if test_ws else "Off"}\nLast update: {self.last_activity}'
+        diagnostic = {'test_ws':test_ws, 'last_activity':self.last_activity, 'msg':msg}
         return diagnostic
 
     def run(self):

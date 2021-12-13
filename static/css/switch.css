@@ -1,0 +1,37 @@
+
+input{
+    display: none;
+}
+
+.btn{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow:  6px 6px 4px #222222, -6px -6px 4px #3e3e3e;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 8px solid #373737;
+    outline: none;
+    cursor: pointer;
+}
+
+.btn::after{
+    font-family: 'FontAwesome';
+    content: '\f011';
+    color: #E31515;
+    font-size: 25px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+input:checked ~ label .btn{
+    box-shadow:  6px 6px 4px #222222, -6px -6px 4px #3e3e3e, inset -10px -10px 15px #3e3e3e,  inset 10px 10px 15px #222222;
+}
+
+input:checked ~ label .btn::after{
+    color: #15E38A;
+}

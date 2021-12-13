@@ -12,7 +12,7 @@ WS.subscribe(BOT)
 TESTER.subscribe(SOCKETIO)
 
 THREADS.update({'bot':Thread(target=WS.run, name='bot')})
-#THREADS.update({'telegram':Thread(target=TELEGRAM.run, daemon=True, name=telegram)})
+#THREADS.update({'telegram':Thread(target=TELEGRAM.run, daemon=True, name='telegram')})
 THREADS.update({'iu':Thread(target=SOCKETIO.run, kwargs={"app": APP}, name='iu')})
 THREADS.update({'tester':Thread(target=TESTER.run, name='tester')})
 

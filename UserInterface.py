@@ -5,6 +5,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, IntegerField
 from User import USERS
 from Tester import TESTER
+from Binance import WS
+from Config import THREADS
+from threading import Thread
 
 class UserInterface(SocketIO):
     def __init__(self, app):
@@ -64,6 +67,22 @@ def register():
 @SOCKETIO.event
 def connect():
     pass
+
+@SOCKETIO.event
+def on():
+    print('on')
+    THREADS.update({'bot': Thread(target=WS.run, name='bot', daemon=False)})
+    THREADS['bot'].start()
+    SOCKETIO.update(TESTER.test())
+    broadcast('switch_mode', True)
+
+@SOCKETIO.event
+def off():
+    print('off')
+    Thread(target=WS.stop(), name='bot', daemon=False).start()
+    print('listo')
+    SOCKETIO.update(TESTER.test())
+    broadcast('switch_mode', False)
 
 
 def broadcast(event, msg):
