@@ -3,7 +3,7 @@ from telegram.ext import Updater, MessageHandler, CommandHandler, Filters, Callb
 from Tester import TESTER
 from DataBase import DATABASE
 
-TOKEN = '2128072171:AAEjPPOqS_ICrRJ2HudLNgBgsqhI6HtdRnI'
+TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 
 class BotTelegram:
     def __init__(self):

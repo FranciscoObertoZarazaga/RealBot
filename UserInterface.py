@@ -16,6 +16,7 @@ class UserInterface(SocketIO):
     def update(self,msg):
         broadcast('state',msg)
 
+
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'secret!'
 SOCKETIO = UserInterface(APP)
