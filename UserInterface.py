@@ -9,6 +9,7 @@ from Binance import WS
 from Config import THREADS
 from threading import Thread
 
+
 class UserInterface(SocketIO):
     def __init__(self, app):
         super(UserInterface, self).__init__(app, async_mode="threading")
