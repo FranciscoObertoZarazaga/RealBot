@@ -17,7 +17,7 @@ THREADS.update({'tester':Thread(target=TESTER.run, name='tester')})
 for thread in THREADS.values():
     thread.start()
 
-SOCKETIO.run(APP, debug=True)
+APP.run(debug=True)
 
 for thread in THREADS.values():
     thread.join()
