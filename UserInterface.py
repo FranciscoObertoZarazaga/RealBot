@@ -31,7 +31,9 @@ class Formulario(FlaskForm):
 
 
 @APP.route('/', methods=['GET', 'POST'])
-def main(form=None):
+def main():
+    return render_template('index.html', tester=TESTER)
+"""
     name = None
     password = None
     logged = False
@@ -46,6 +48,7 @@ def main(form=None):
         return render_template('index.html',form=form, tester=TESTER)
     else:
         return render_template('login.html', name=name, password=password, form=form)
+"""
 
 
 @APP.route('/register', methods=['GET', 'POST'])
