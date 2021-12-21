@@ -8,17 +8,20 @@ from threading import Thread
 import warnings
 warnings.filterwarnings("ignore")
 
-WS.subscribe(BOT)
-TESTER.subscribe(SOCKETIO)
+if __name__ == '__main__':
+    WS.subscribe(BOT)
+    TESTER.subscribe(SOCKETIO)
 
-THREADS.update({'bot':Thread(target=WS.run, name='bot')})
-#THREADS.update({'telegram':Thread(target=TELEGRAM.run, name='telegram')})
-THREADS.update({'iu':Thread(target=SOCKETIO.run, kwargs={"app": APP}, name='iu')})
-THREADS.update({'tester':Thread(target=TESTER.run, name='tester')})
+    THREADS.update({'bot':Thread(target=WS.run, name='bot')})
+    #THREADS.update({'telegram':Thread(target=TELEGRAM.run, name='telegram')})
+    #THREADS.update({'iu':Thread(target=SOCKETIO.run, kwargs={"app": APP}, name='iu')})
+    THREADS.update({'tester':Thread(target=TESTER.run, name='tester')})
 
-for thread in THREADS.values():
-    thread.start()
+    for thread in THREADS.values():
+        thread.start()
 
-for thread in THREADS.values():
-    thread.join()
+    SOCKETIO.run(APP)
+
+    for thread in THREADS.values():
+        thread.join()
 
