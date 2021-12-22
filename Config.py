@@ -1,6 +1,6 @@
 from binance.enums import *
 
-IS_REAL_TRADER = False
+IS_REAL_TRADER = True
 
 ASSET = 'BTC'
 FIAT = 'USDT'
