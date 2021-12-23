@@ -13,9 +13,6 @@ class Binance:
     def __init__(self, api_key=API_KEY, secret_key=SECRET_KEY):
         self.client = Client(api_key, secret_key)
 
-    def __del__(self):
-        print('Binance eliminado')
-
     def getAllTickers(self):
         return self.client.get_all_tickers()
 

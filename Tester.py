@@ -1,11 +1,10 @@
 from Config import THREADS
-from Binance import WS
-import threading
 from datetime import datetime
 from time import sleep
-from Observed import Observed
+import pytz
 
-class Tester(Observed):
+
+class Tester:
     def __init__(self):
         super(Tester, self).__init__()
         self.last_activity = None
@@ -15,7 +14,7 @@ class Tester(Observed):
         return THREADS['bot'].is_alive()
 
     def set_last_activity(self):
-        self.last_activity = datetime.now().strftime("%H:%M %d-%m-%Y")
+        self.last_activity = datetime.now(tz=pytz.timezone('America/Cordoba')).strftime("%H:%M %d-%m-%Y")
 
     def test(self):
         test_ws = self.test_ws()
@@ -27,7 +26,6 @@ class Tester(Observed):
         while self.is_runnable:
             sleep(3)
             diagnostic = self.test()
-            self.notify(diagnostic)
 
     def restart(self):
         pass
