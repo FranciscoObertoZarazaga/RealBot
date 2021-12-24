@@ -24,7 +24,6 @@ class Users:
         self.users = list()
         self._set_users()
 
-
     def _set_users(self):
         users = list()
         data = DATABASE.select('telegram')

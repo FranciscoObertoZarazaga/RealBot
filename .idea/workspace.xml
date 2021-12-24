@@ -2,42 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="44318f09-3fe0-43cc-9096-9e2cdd80ffc0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Binance.py" beforeDir="false" afterPath="$PROJECT_DIR$/Binance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Telegram.py" beforeDir="false" afterPath="$PROJECT_DIR$/Telegram.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tester.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tester.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User.py" beforeDir="false" afterPath="$PROJECT_DIR$/User.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserInterface.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/card.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/index.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/normalize.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/switch.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Black.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-BlackItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Bold.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-BoldItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-ExtraBold.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-ExtraBoldItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-ExtraLight.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-ExtraLightItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Italic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Light.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-LightItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Medium.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-MediumItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-Regular.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-SemiBold.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/fonts/SourceCodePro-SemiBoldItalic.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/html/loader.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/img/gradient.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/img/wave.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/socketio.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/basic.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

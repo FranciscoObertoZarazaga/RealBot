@@ -6,15 +6,15 @@ from User import USERS
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = range(1)
+MSG = range(1)
 
 class BotTelegram:
     def __init__(self):
         self.updater = Updater(TOKEN)
         self.dispatcher = self.updater.dispatcher
 
-        entry_points = [
-            CommandHandler('start',self.start)
-        ]
+        ###REGISTER CONVERSATION###
+        entry_points = [CommandHandler('start',self.start)]
         states = {
             ALIAS: [
                 MessageHandler(
@@ -23,15 +23,31 @@ class BotTelegram:
                 )
             ]
         }
-        fallbacks = [
-            MessageHandler(filters=Filters.all, callback=self.fallbackCallback)
-        ]
-
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackRegisterCallback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
+        ###END REGISTER CONVERSATION####
+
+        ###DIFFUSION CONVERSATION###
+        entry_points = [CommandHandler('diffusion', self.diffusion)]
+        states = {
+            MSG: [
+                MessageHandler(
+                    filters=Filters.text & ~Filters.command,
+                    callback=self._diffusion
+                )
+            ]
+        }
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackDiffusionCallback)]
+        self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
+        ###END DIFFUSION CONVERSATION###
+
+        ###COMMANDS###
         self.dispatcher.add_handler(CommandHandler('help', self.help))
         self.dispatcher.add_handler(CommandHandler('state', self.state))
+        ###END COMMANDS###
 
-        self.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self.diffusion))
+        ###MESSAGES###
+        ###END MESSAGES###
 
     def run(self):
         self.updater.start_polling()
@@ -53,7 +69,7 @@ class BotTelegram:
         if USERS.is_registered(new_id):
             user = USERS.get_user(new_id)
             update.message.reply_text(f"Hi {user.alias}!")
-            self.help(update)
+            self.help(update, context)
             return ConversationHandler.END
         else:
             update.message.reply_text("Welcome!")
@@ -61,10 +77,11 @@ class BotTelegram:
             update.message.reply_text('Enter your name')
             return ALIAS
 
-    def help(self, update: Update) -> None:
+    def help(self, update: Update, context: CallbackContext) -> None:
         Message.delete(update.message)
         buttons = [[
             KeyboardButton('/state'),
+            KeyboardButton('/diffusion'),
             KeyboardButton('/help')
         ]]
 
@@ -80,9 +97,19 @@ class BotTelegram:
     def diffusion(self, update: Update, context: CallbackContext) -> None:
         user = USERS.get_user(update.message.chat.id)
         if user.is_god():
-            for user_id in USERS.get_IDs():
-                if user_id != user.id:
-                    self.updater.bot.send_message(user_id, update.message.text)
+            update.message.reply_text('What message do you want to spread?\nEnter /cancel to exit')
+            return MSG
+        else:
+            update.message.reply_text('You do not have permission to diffusion')
+            return ConversationHandler.END
+
+    def _diffusion(self, update: Update, context: CallbackContext) -> None:
+        user = USERS.get_user(update.message.chat.id)
+        for user_id in USERS.get_IDs():
+            if user_id != user.id:
+                self.updater.bot.send_message(user_id, update.message.text)
+        update.message.reply_text('Message sent')
+        return ConversationHandler.END
 
     def register(self, update, callback):
         new_id = update.message.chat.id
@@ -92,8 +119,15 @@ class BotTelegram:
         self.help(update)
         return ConversationHandler.END
 
-    def fallbackCallback(self, update, callback):
+    def fallbackRegisterCallback(self, update, callback):
         update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
 
+    def fallbackDiffusionCallback(self, update, callback):
+        msg = update.message.text
+        if msg == '/cancel':
+            update.message.reply_text('Diffusion canceled')
+            return ConversationHandler.END
+        else:
+            update.message.reply_text('You cannot transmit this message, please enter a different one\nEnter /cancel to exit')
 
 TELEGRAM = BotTelegram()
