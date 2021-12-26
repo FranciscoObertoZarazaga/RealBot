@@ -67,19 +67,22 @@ class Binance:
             minNotional = self.getMinNotional(symbol)
             usdt = self.getusdt()
             if usdt >= minNotional:
-                info = self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
-                return info
+                self.client.order_market_buy(symbol='BTCUSDT',quoteOrderQty=usdt, newOrderRespType='ACK')
+                return True
+            return False
         except Exception as e:
             print(e)
             return self.buy(symbol)
 
     def sell(self,symbol):
         try:
-            minQty = self.getMinQty(symbol)
+            minQty, maxQty, stepSize = self.get_sell_filtters(symbol)
             crypto = self.getbtc()
-            if crypto >= minQty:
-                info = self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
-                return info
+            crypto = crypto - crypto % stepSize
+            if crypto >= minQty and crypto <= maxQty:
+                self.client.order_market_sell(symbol=symbol, quantity=crypto, newOrderRespType='ACK')
+                return True
+            return False
         except Exception as e:
             print(e)
             return self.sell(symbol)
@@ -119,13 +122,19 @@ class Binance:
                 minNotional = filter['minNotional']
         return float(minNotional)
 
-    def getMinQty(self,symbol):
+    def get_sell_filtters(self,symbol):
         minQty = None
         filters = self.getFilters(symbol)
         for filter in filters:
             if filter['filterType'] == 'LOT_SIZE':
-                minQty = filter['minQty']
-        return float(minQty)
+                minQty, maxQty, stepSize = filter['minQty'], filter['maxQty'], filter['stepSize']
+        return float(minQty), float(maxQty), float(stepSize)
+
+    def get_trade(self, symbol, trade_id=None, limit=None):
+        return self.client.get_my_trades(symbol=symbol, fromId=trade_id, limit=limit)
+
+    def get_last_trade(self, symbol):
+        return self.get_trade(symbol, limit=1)[0]
 
 
 class WebSocketBinance(Observed):
