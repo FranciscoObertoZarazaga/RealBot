@@ -3,10 +3,11 @@ from telegram.ext import Updater, MessageHandler, CommandHandler, ConversationHa
 from Tester import TESTER
 from time import sleep
 from User import USERS
+from Trader import get_results
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
-ALIAS = range(1)
-MSG = range(1)
+ALIAS = 0
+MSG = 0
 
 class BotTelegram:
     def __init__(self):
@@ -44,6 +45,7 @@ class BotTelegram:
         ###COMMANDS###
         self.dispatcher.add_handler(CommandHandler('help', self.help))
         self.dispatcher.add_handler(CommandHandler('state', self.state))
+        self.dispatcher.add_handler(CommandHandler('results', self.results))
         ###END COMMANDS###
 
         ###MESSAGES###
@@ -63,7 +65,7 @@ class BotTelegram:
         sleep(60)
         Message.delete(resp)
 
-    def start(self, update: Update, context: CallbackContext) -> None:
+    def start(self, update: Update, context: CallbackContext) -> int:
         new_id = update.message.chat.id
 
         if USERS.is_registered(new_id):
@@ -79,11 +81,16 @@ class BotTelegram:
 
     def help(self, update: Update, context: CallbackContext) -> None:
         Message.delete(update.message)
-        buttons = [[
-            KeyboardButton('/state'),
-            KeyboardButton('/diffusion'),
-            KeyboardButton('/help')
-        ]]
+        buttons = [
+            [
+                KeyboardButton('/state'),
+                KeyboardButton('/results')
+            ],
+            [
+                KeyboardButton('/diffusion'),
+                KeyboardButton('/help')
+            ]
+        ]
 
         keyboardMarkup = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
 
@@ -94,7 +101,7 @@ class BotTelegram:
         for id in USERS.get_IDs():
             self.updater.bot.send_message(id, msg)
 
-    def diffusion(self, update: Update, context: CallbackContext) -> None:
+    def diffusion(self, update: Update, context: CallbackContext) -> int:
         user = USERS.get_user(update.message.chat.id)
         if user.is_god():
             update.message.reply_text('What message do you want to spread?\nEnter /cancel to exit')
@@ -116,8 +123,18 @@ class BotTelegram:
         alias = update.message.text
         USERS.register(new_id, alias)
         update.message.reply_text('You have been registered')
-        self.help(update)
+        self.help(update, callback)
         return ConversationHandler.END
+
+    def results(self, update: Update, context: CallbackContext) -> None:
+        Message.delete(update.message)
+        results = get_results()
+        msg = ''
+        for result in results:
+            msg += result
+        resp = update.message.reply_text(msg)
+        sleep(60)
+        Message.delete(resp)
 
     def fallbackRegisterCallback(self, update, callback):
         update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')

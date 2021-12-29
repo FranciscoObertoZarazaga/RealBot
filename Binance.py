@@ -76,7 +76,7 @@ class Binance:
 
     def sell(self,symbol):
         try:
-            minQty, maxQty, stepSize = self.get_sell_filtters(symbol)
+            minQty, maxQty, stepSize = self.get_sell_filters(symbol)
             crypto = self.getbtc()
             crypto = crypto - crypto % stepSize
             if crypto >= minQty and crypto <= maxQty:
@@ -122,13 +122,12 @@ class Binance:
                 minNotional = filter['minNotional']
         return float(minNotional)
 
-    def get_sell_filtters(self,symbol):
-        minQty = None
+    def get_sell_filters(self, symbol):
         filters = self.getFilters(symbol)
         for filter in filters:
             if filter['filterType'] == 'LOT_SIZE':
                 minQty, maxQty, stepSize = filter['minQty'], filter['maxQty'], filter['stepSize']
-        return float(minQty), float(maxQty), float(stepSize)
+                return float(minQty), float(maxQty), float(stepSize)
 
     def get_trade(self, symbol, trade_id=None, limit=None):
         return self.client.get_my_trades(symbol=symbol, fromId=trade_id, limit=limit)
@@ -136,6 +135,8 @@ class Binance:
     def get_last_trade(self, symbol):
         return self.get_trade(symbol, limit=1)[0]
 
+    def get_trade_with_id(self, symbol, trade_id):
+        return self.get_trade(symbol, trade_id=trade_id, limit=1)[0]
 
 class WebSocketBinance(Observed):
     def __init__(self):
