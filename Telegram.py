@@ -3,7 +3,7 @@ from telegram.ext import Updater, MessageHandler, CommandHandler, ConversationHa
 from Tester import TESTER
 from time import sleep
 from User import USERS
-from Trader import get_results
+from Trader import get_results, get_trades
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = 0
@@ -46,6 +46,7 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('help', self.help))
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('results', self.results))
+        self.dispatcher.add_handler(CommandHandler('trades', self.trades))
         ###END COMMANDS###
 
         ###MESSAGES###
@@ -84,6 +85,9 @@ class BotTelegram:
         buttons = [
             [
                 KeyboardButton('/state'),
+            ],
+            [
+                KeyboardButton('/trades'),
                 KeyboardButton('/results')
             ],
             [
@@ -133,6 +137,13 @@ class BotTelegram:
         for result in results:
             msg += result
         resp = update.message.reply_text(msg)
+        sleep(60)
+        Message.delete(resp)
+
+    def trades(self, update: Update, context: CallbackContext) -> None:
+        Message.delete(update.message)
+        path = get_trades()
+        resp = update.message.reply_document(document=open(path))
         sleep(60)
         Message.delete(resp)
 

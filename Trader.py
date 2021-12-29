@@ -119,9 +119,12 @@ class Trades:
                 buy.append(trade)
             else:
                 sell.append(trade)
+        if buy and sell:
+            all_trades.append({'buy': buy, 'sell': sell})
         return all_trades
 
     def get_trades_dataframe(self):
+        self.sort()
         data = pd.DataFrame()
         all_trades = self._make_pairs()
         self._join_trades(all_trades)
@@ -171,7 +174,6 @@ def get_all_traders():
     return traders
 
 
-"""
 def get_results():
     array = list()
     for trader in TRADERS:
@@ -182,9 +184,18 @@ def get_results():
         msg += '\n' * 5
         array.append(msg)
     return array
+
+def get_trades():
+    aux_trades = Trades(None, None)
+    for trader in TRADERS:
+        aux_trades.trades = aux_trades.trades + trader.trades.trades
+    aux_trades.sort()
+    dataframe = aux_trades.get_trades_dataframe()
+    path = 'trades.csv'
+    dataframe.to_csv(path)
+    return path
+
 """
-
-
 def get_results():
     aux_trades = Trades(None, None)
     for trader in TRADERS:
@@ -193,7 +204,7 @@ def get_results():
     dataframe = aux_trades.get_trades_dataframe()
     results = Results(dataframe)
     return str(results)
-
+"""
 
 TRADERS = get_all_traders()
 
