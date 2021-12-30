@@ -4,6 +4,8 @@ from binance import ThreadedWebsocketManager
 from datetime import datetime
 from Observed import Observed
 from Config import SYMBOL, INTERVAL
+from threading import Thread
+from Config import THREADS
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -150,6 +152,10 @@ class WebSocketBinance(Observed):
             self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
             self.ws.join()
 
+    def start(self):
+        THREADS.update({'bot': Thread(target=self.run, name='bot')})
+        THREADS['bot'].start()
+
     def stop(self):
         if self.ws.is_alive():
             assert self.kline_socket is not None
@@ -158,9 +164,9 @@ class WebSocketBinance(Observed):
             self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
 
     def restart(self):
-        print('Reinicio de Bot-Websocket')
         self.stop()
-        self.run()
+        self.start()
+
 
     def notify(self,data):
         try:

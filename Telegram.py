@@ -4,6 +4,9 @@ from Tester import TESTER
 from time import sleep
 from User import USERS
 from Trader import get_results, get_trades
+from Binance import WS
+from Config import THREADS
+from threading import Thread
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = 0
@@ -47,6 +50,9 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('state', self.state))
         self.dispatcher.add_handler(CommandHandler('results', self.results))
         self.dispatcher.add_handler(CommandHandler('trades', self.trades))
+        self.dispatcher.add_handler(CommandHandler('turnOn', self.turn_on))
+        self.dispatcher.add_handler(CommandHandler('turnOff', self.turn_off))
+        self.dispatcher.add_handler(CommandHandler('reset', self.reset))
         ###END COMMANDS###
 
         ###MESSAGES###
@@ -89,6 +95,11 @@ class BotTelegram:
             [
                 KeyboardButton('/trades'),
                 KeyboardButton('/results')
+            ],
+            [
+                KeyboardButton('/turnOn'),
+                KeyboardButton('/turnOff'),
+                KeyboardButton('/reset')
             ],
             [
                 KeyboardButton('/diffusion'),
@@ -146,6 +157,34 @@ class BotTelegram:
         resp = update.message.reply_document(document=open(path))
         sleep(60)
         Message.delete(resp)
+
+    def turn_on(self, update: Update, context: CallbackContext) -> None:
+        user = USERS.get_user(update.message.chat.id)
+        if user.is_god():
+            Message.delete(update.message)
+            WS.start()
+            update.message.reply_text('On')
+        else:
+            update.message.reply_text("You don't have permission to perform this action")
+
+    def turn_off(self, update: Update, context: CallbackContext) -> None:
+        user = USERS.get_user(update.message.chat.id)
+        if user.is_god():
+            Message.delete(update.message)
+            WS.stop()
+            update.message.reply_text('Off')
+        else:
+            update.message.reply_text("You don't have permission to perform this action")
+
+    def reset(self, update: Update, context: CallbackContext) -> None:
+        user = USERS.get_user(update.message.chat.id)
+        if user.is_god():
+            Message.delete(update.message)
+            update.message.reply_text('Restarting...')
+            WS.restart()
+            update.message.reply_text('On')
+        else:
+            update.message.reply_text("You don't have permission to perform this action")
 
     def fallbackRegisterCallback(self, update, callback):
         update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
