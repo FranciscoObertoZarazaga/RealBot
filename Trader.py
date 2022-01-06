@@ -1,7 +1,7 @@
-from Config import SYMBOL, IS_REAL_TRADER
+from Config import SYMBOL, IS_REAL_TRADER, THREADS
 from time import sleep
 from DataBase import DATABASE
-from Binance import Binance
+from Binance import Binance, WS
 from datetime import datetime
 from Results import Results
 import pandas as pd
@@ -22,11 +22,14 @@ class Trader:
         if IS_REAL_TRADER:
             if self.binance.sell(SYMBOL):
                 self.save_trade()
+                WS.restart()
+
 
     def save_trade(self):
-        last_trade = self.binance.get_last_trade(SYMBOL)
-        trade_id = last_trade['id']
-        self.trades.add_trade(self.id, trade_id)
+        last_trades = self.binance.get_last_trade(SYMBOL)
+        for trade in last_trades:
+            trade_id = trade['id']
+            self.trades.add_trade(self.id, trade_id)
 
     def get_results(self):
         dataframe = self.trades.get_trades_dataframe()
@@ -74,6 +77,11 @@ class Trades:
         for trade in self.trades:
             ids.append(trade.trade_id)
         return ids
+
+    def get_trade_by_id(self, trade_id):
+        for trade in self.trades:
+            if trade.trade_id == trade_id:
+                return trade
 
     def _get_artificial_trade(self, key, trades):
         mean, total, time = 0, 0, None
@@ -128,6 +136,7 @@ class Trades:
         data = pd.DataFrame()
         all_trades = self._make_pairs()
         self._join_trades(all_trades)
+
         for trade in all_trades:
             row = {
                 'buy_amount': trade['buy'].quote_qty,

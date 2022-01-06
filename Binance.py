@@ -1,4 +1,4 @@
-import time
+from time import sleep
 from binance.client import Client
 from binance import ThreadedWebsocketManager
 from datetime import datetime
@@ -104,7 +104,7 @@ class Binance:
                 print("Reconectando")
             self.getStatus()
         except:
-            time.sleep(10)
+            sleep(10)
             self.reconnect(0)
 
     def alert(self,msg):
@@ -135,7 +135,16 @@ class Binance:
         return self.client.get_my_trades(symbol=symbol, fromId=trade_id, limit=limit)
 
     def get_last_trade(self, symbol):
-        return self.get_trade(symbol, limit=1)[0]
+        last_trades = list()
+        trades = self.get_trade(symbol)
+        last_trade = trades[-1]
+        is_buyer = last_trade['isBuyer']
+        for trade in reversed(trades):
+            if trade['isBuyer'] is is_buyer:
+                last_trades.append(trade)
+            else:
+                break
+        return reversed(last_trades)
 
     def get_trade_with_id(self, symbol, trade_id):
         return self.get_trade(symbol, trade_id=trade_id, limit=1)[0]
@@ -163,8 +172,9 @@ class WebSocketBinance(Observed):
             self.ws.stop()
             self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
 
-    def restart(self):
+    def restart(self, t=0):
         self.stop()
+        sleep(t)
         self.start()
 
 
