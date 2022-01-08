@@ -7,12 +7,6 @@ from threading import Thread
 import warnings
 warnings.filterwarnings("ignore")
 
-from Trader import TRADERS, get_results
-trader = TRADERS[0]
-print(get_results()[0])
-
-exit()
-
 WS.subscribe(BOT)
 
 THREADS.update({'bot': Thread(target=WS.run, name='bot')})
