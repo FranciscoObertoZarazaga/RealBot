@@ -20,8 +20,8 @@ class Results:
         mean_rate = trades['tasa'].mean() * 100
         return mean_rate, positive_rate, negative_rate
 
-    def _get_reward_and_loss(self, trades):
-        return sum(trades['reward']), sum(trades[trades['reward'] < 0]['reward'])
+    def _get_gain_and_loss(self, trades):
+        return sum(trades[trades['reward'] > 0]['reward']), sum(trades[trades['reward'] < 0]['reward'])
 
     def _get_amounts(self, trades):
         initial_amount, final_amount = trades['buy_amount'][0], trades['sell_amount'][len(trades) - 1]
@@ -40,13 +40,13 @@ class Results:
         n_trades, n_positive_trades, n_negative_trades = self._get_number_of_trades(trades)
         mean_rate, positive_rate, negative_rate = self._get_rates(trades)
         performance = mean_rate * n_trades
-        reward, loss = self._get_reward_and_loss(trades)
+        gain, loss = self._get_gain_and_loss(trades)
         initial_amount, final_amount = self._get_amounts(trades)
-        ganancia_bruta = reward + abs(loss)
+        reward = final_amount - initial_amount
         tasa_de_aciertos = 100 * (1 - abs(loss) / (abs(loss) * 2 + reward))
         tasa_de_ganancia = (final_amount / initial_amount)
         time = self._get_time(trades)
-        daily_performance = performance / (time.days)
+        daily_performance = performance / time.days
         monthly_performance = daily_performance * 30
         annual_performance = daily_performance * 365
 
@@ -59,7 +59,7 @@ class Results:
         values = [
             initial_amount,
             final_amount,
-            ganancia_bruta,
+            gain,
             loss,
             reward,
             tasa_de_aciertos,

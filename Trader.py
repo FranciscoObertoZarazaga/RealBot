@@ -22,7 +22,7 @@ class Trader:
         if IS_REAL_TRADER:
             if self.binance.sell(SYMBOL):
                 self.save_trade()
-                WS.restart()
+                WS.restart(600)
 
 
     def save_trade(self):
