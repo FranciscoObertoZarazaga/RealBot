@@ -53,6 +53,8 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('turnOn', self.turn_on))
         self.dispatcher.add_handler(CommandHandler('turnOff', self.turn_off))
         self.dispatcher.add_handler(CommandHandler('reset', self.reset))
+        self.dispatcher.add_handler(CommandHandler('allBuy', self.all_buy))
+        self.dispatcher.add_handler(CommandHandler('allSell', self.all_sell))
         ###END COMMANDS###
 
         ###MESSAGES###
@@ -69,8 +71,7 @@ class BotTelegram:
         Message.delete(update.message)
         state = TESTER.test()['msg']
         resp = update.message.reply_text(state)
-        sleep(60)
-        Message.delete(resp)
+        Thread(target=self.clean, args=(resp, 10)).start()
 
     def start(self, update: Update, context: CallbackContext) -> int:
         new_id = update.message.chat.id
@@ -148,15 +149,13 @@ class BotTelegram:
         for result in results:
             msg += result
         resp = update.message.reply_text(msg)
-        sleep(60)
-        Message.delete(resp)
+        Thread(target=self.clean, args=(resp, 60)).start()
 
     def trades(self, update: Update, context: CallbackContext) -> None:
         Message.delete(update.message)
         path = get_trades()
         resp = update.message.reply_document(document=open(path))
-        sleep(60)
-        Message.delete(resp)
+        Thread(target=self.clean, args=(resp, 60)).start()
 
     def turn_on(self, update: Update, context: CallbackContext) -> None:
         user = USERS.get_user(update.message.chat.id)
@@ -185,6 +184,16 @@ class BotTelegram:
             update.message.reply_text('On')
         else:
             update.message.reply_text("You don't have permission to perform this action")
+
+    def all_buy(self, update: Update, context: CallbackContext) -> None:
+        pass
+
+    def all_sell(self, update: Update, context: CallbackContext) -> None:
+        pass
+
+    def clean(self, msg, t=60):
+        sleep(t)
+        Message.delete(msg)
 
     def fallbackRegisterCallback(self, update, callback):
         update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
