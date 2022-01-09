@@ -5,12 +5,13 @@ from time import sleep
 from User import USERS
 from Trader import get_results, get_trades
 from Binance import WS
-from Config import THREADS
+from Trader import TRADERS
 from threading import Thread
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = 0
 MSG = 0
+CONFIRM = 0
 
 class BotTelegram:
     def __init__(self):
@@ -38,12 +39,37 @@ class BotTelegram:
                 MessageHandler(
                     filters=Filters.text & ~Filters.command,
                     callback=self._diffusion
-                )
+                ),
+                CommandHandler('cancel', self.cancel)
             ]
         }
         fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackDiffusionCallback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
         ###END DIFFUSION CONVERSATION###
+
+        ###ALL_BUY CONVERSATION###
+        entry_points = [CommandHandler('allBuy', self.confirm)]
+        states = {
+            CONFIRM: [
+                CommandHandler('confirm', self.all_buy),
+                CommandHandler('cancel', self.cancel)
+            ]
+        }
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackTransactionCallback)]
+        self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
+        ###END ALL_BUY CONVERSATION###
+
+        ###ALL_SELL CONVERSATION###
+        entry_points = [CommandHandler('allSell', self.confirm)]
+        states = {
+            CONFIRM: [
+                CommandHandler('confirm', self.all_sell),
+                CommandHandler('cancel', self.cancel)
+            ]
+        }
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackTransactionCallback)]
+        self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
+        ###END ALL_SELL CONVERSATION###
 
         ###COMMANDS###
         self.dispatcher.add_handler(CommandHandler('help', self.help))
@@ -53,8 +79,6 @@ class BotTelegram:
         self.dispatcher.add_handler(CommandHandler('turnOn', self.turn_on))
         self.dispatcher.add_handler(CommandHandler('turnOff', self.turn_off))
         self.dispatcher.add_handler(CommandHandler('reset', self.reset))
-        self.dispatcher.add_handler(CommandHandler('allBuy', self.all_buy))
-        self.dispatcher.add_handler(CommandHandler('allSell', self.all_sell))
         ###END COMMANDS###
 
         ###MESSAGES###
@@ -103,6 +127,10 @@ class BotTelegram:
                 KeyboardButton('/reset')
             ],
             [
+                KeyboardButton('/allBuy'),
+                KeyboardButton('/allSell')
+            ],
+            [
                 KeyboardButton('/diffusion'),
                 KeyboardButton('/help')
             ]
@@ -118,12 +146,10 @@ class BotTelegram:
             self.updater.bot.send_message(id, msg)
 
     def diffusion(self, update: Update, context: CallbackContext) -> int:
-        user = USERS.get_user(update.message.chat.id)
-        if user.is_god():
+        if self.verify(update):
             update.message.reply_text('What message do you want to spread?\nEnter /cancel to exit')
             return MSG
         else:
-            update.message.reply_text('You do not have permission to diffusion')
             return ConversationHandler.END
 
     def _diffusion(self, update: Update, context: CallbackContext) -> None:
@@ -158,52 +184,72 @@ class BotTelegram:
         Thread(target=self.clean, args=(resp, 60)).start()
 
     def turn_on(self, update: Update, context: CallbackContext) -> None:
-        user = USERS.get_user(update.message.chat.id)
-        if user.is_god():
+        if self.verify(update):
             Message.delete(update.message)
             WS.start()
             update.message.reply_text('On')
-        else:
-            update.message.reply_text("You don't have permission to perform this action")
 
     def turn_off(self, update: Update, context: CallbackContext) -> None:
-        user = USERS.get_user(update.message.chat.id)
-        if user.is_god():
+        if self.verify(update):
             Message.delete(update.message)
             WS.stop()
             update.message.reply_text('Off')
-        else:
-            update.message.reply_text("You don't have permission to perform this action")
 
     def reset(self, update: Update, context: CallbackContext) -> None:
-        user = USERS.get_user(update.message.chat.id)
-        if user.is_god():
+        if self.verify(update):
             Message.delete(update.message)
             update.message.reply_text('Restarting...')
             WS.restart()
             update.message.reply_text('On')
-        else:
-            update.message.reply_text("You don't have permission to perform this action")
 
-    def all_buy(self, update: Update, context: CallbackContext) -> None:
-        pass
+    def all_buy(self, update: Update, context: CallbackContext):
+        buy_threads = list()
+        for trader in TRADERS:
+            buy_threads.append(Thread(target=trader.buy))
+        for thread in buy_threads:
+            thread.start()
+            
+        update.message.reply_text('All traders bought')
+        return ConversationHandler.END
 
-    def all_sell(self, update: Update, context: CallbackContext) -> None:
-        pass
+    def all_sell(self, update: Update, context: CallbackContext):
+        sell_threads = list()
+        for trader in TRADERS:
+            sell_threads.append(Thread(target=trader.sell()))
+        for thread in sell_threads:
+            thread.start()
+
+        update.message.reply_text('All traders sold')
+        return ConversationHandler.END
 
     def clean(self, msg, t=60):
         sleep(t)
         Message.delete(msg)
 
+    def confirm(self, update: Update, context: CallbackContext):
+        if self.verify(update):
+            update.message.reply_text('Enter /confirm to perform the action')
+            update.message.reply_text('Enter /cancel to abort')
+            return CONFIRM
+
+    def verify(self, update):
+        user = USERS.get_user(update.message.chat.id)
+        is_god = user.is_god()
+        if not is_god:
+            update.message.reply_text("You don't have permission to perform this action")
+        return is_god
+
+    def cancel(self, update, callback):
+        update.message.reply_text('Canceled')
+        return ConversationHandler.END
+
     def fallbackRegisterCallback(self, update, callback):
         update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
 
     def fallbackDiffusionCallback(self, update, callback):
-        msg = update.message.text
-        if msg == '/cancel':
-            update.message.reply_text('Diffusion canceled')
-            return ConversationHandler.END
-        else:
-            update.message.reply_text('You cannot transmit this message, please enter a different one\nEnter /cancel to exit')
+        update.message.reply_text('You cannot transmit this message, please enter a different one\nEnter /cancel to exit')
+
+    def fallbackTransactionCallback(self, update, callback):
+        update.message.reply_text('error')
 
 TELEGRAM = BotTelegram()
