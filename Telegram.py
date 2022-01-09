@@ -208,7 +208,7 @@ class BotTelegram:
             buy_threads.append(Thread(target=trader.buy))
         for thread in buy_threads:
             thread.start()
-            
+
         update.message.reply_text('All traders bought')
         return ConversationHandler.END
 
@@ -231,6 +231,8 @@ class BotTelegram:
             update.message.reply_text('Enter /confirm to perform the action')
             update.message.reply_text('Enter /cancel to abort')
             return CONFIRM
+        else:
+            return ConversationHandler.END
 
     def verify(self, update):
         user = USERS.get_user(update.message.chat.id)
