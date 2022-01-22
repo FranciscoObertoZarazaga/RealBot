@@ -18,7 +18,7 @@ class Bot:
         self.kl.load()
         kline = self.kl.getKlines()
         points = 0
-        points += WinStrategy(kline)
+        points += SqueezeStrategy(kline)
 
         if points > 0:
             self.all_buy()

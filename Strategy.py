@@ -11,3 +11,15 @@ def WinStrategy(df, n=-1):
         if adx[n-1] < 30:
             return 1 if isMagic else -1
     return 0
+
+
+def SqueezeStrategy(df, n=-1):
+    sm = df['sm']
+    isMin = sm[n] > sm[n - 1] and sm[n - 2] > sm[n - 1]
+    isMax = sm[n] < sm[n - 1] and sm[n - 2] < sm[n - 1]
+    if isMin:
+        return 1
+    if isMax:
+        return -1
+    return 0
+
