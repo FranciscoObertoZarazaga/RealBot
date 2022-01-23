@@ -1,12 +1,36 @@
 from datetime import datetime
 
+import pandas as pd
+
+
 class Results:
     def __init__(self, trades):
         self.trades = trades
 
+    def _add_trade(self, flag, trade_list):
+        if flag['buy'] > 0 and flag['sell'] > 0:
+            trade_list = trade_list.append(flag, ignore_index=True)
+            return {'buy': 0, 'sell': 0}, trade_list
+        return flag, trade_list
+
     def _set_all(self, trades):
-        trades['reward'] = trades['sell_amount'] - trades['buy_amount']
-        trades['tasa'] = trades['sell_amount'] / trades['buy_amount'] - 1
+        flag = {'buy': 0, 'sell': 0}
+        trade_list = pd.DataFrame({'buy': [], 'sell': []})
+
+        for index, trade in trades.iterrows():
+            if trade['is_buyer']:
+                flag, trade_list = self._add_trade(flag, trade_list)
+                flag['buy'] += trade['qty']
+            else:
+                if flag['buy'] > 0:
+                    flag['sell'] += trade['qty']
+
+        _, trade_list = self._add_trade(flag, trade_list)
+        trade_list['reward'] = trade_list['sell'] - trade_list['buy']
+        trade_list['tasa'] = trade_list['sell'] / trade_list['buy'] - 1
+
+        return trade_list
+
 
     def _get_number_of_trades(self, trades):
         n_trades = len(trades['reward'])
@@ -24,31 +48,34 @@ class Results:
         return sum(trades[trades['reward'] > 0]['reward']), sum(trades[trades['reward'] < 0]['reward'])
 
     def _get_amounts(self, trades):
-        initial_amount, final_amount = trades['buy_amount'][0], trades['sell_amount'][len(trades) - 1]
+        initial_amount, final_amount = trades['buy'][0], trades['sell'][len(trades) - 1]
         return initial_amount, final_amount
 
     def _get_time(self, trades):
-        initial_time = trades['buy_time'][0].strftime('%H:%M %d-%m-%Y')
-        final_time = trades['sell_time'][len(trades) - 1].strftime('%H:%M %d-%m-%Y')
+        initial_time = trades['time'][0].strftime('%H:%M %d-%m-%Y')
+        final_time = trades['time'][len(trades) - 1].strftime('%H:%M %d-%m-%Y')
         time = datetime.strptime(final_time, '%H:%M %d-%m-%Y') - datetime.strptime(initial_time, '%H:%M %d-%m-%Y')
         return time
 
     def __str__(self):
         msg = ''
         trades = self.trades.copy()
-        self._set_all(trades)
-        n_trades, n_positive_trades, n_negative_trades = self._get_number_of_trades(trades)
-        mean_rate, positive_rate, negative_rate = self._get_rates(trades)
+        with pd.option_context('display.max_rows', None, 'display.max_columns',None):
+            print(trades)
+        results = self._set_all(trades)
+        reward = sum(results['reward'])
+        n_trades, n_positive_trades, n_negative_trades = self._get_number_of_trades(results)
+        mean_rate, positive_rate, negative_rate = self._get_rates(results)
         performance = mean_rate * n_trades
-        gain, loss = self._get_gain_and_loss(trades)
-        initial_amount, final_amount = self._get_amounts(trades)
-        reward = final_amount - initial_amount
+        gain, loss = self._get_gain_and_loss(results)
+        initial_amount, final_amount = self._get_amounts(results)
         tasa_de_aciertos = 100 * (1 - abs(loss) / (abs(loss) * 2 + reward))
         tasa_de_ganancia = (final_amount / initial_amount)
         time = self._get_time(trades)
         daily_performance = performance / time.days
         monthly_performance = daily_performance * 30
         annual_performance = daily_performance * 365
+        print(results)
 
         msg += '#' * 25 + '\n'
         msg += f'TRADEANDO DURANTE\n'

@@ -39,7 +39,7 @@ class DataBase:
         except Exception as e:
             print(e)
 
-    def select(self,table_name):
+    def select(self, table_name):
         try:
             self.cursor.execute('SELECT * FROM ' + table_name)
             return list(self.cursor.fetchall())

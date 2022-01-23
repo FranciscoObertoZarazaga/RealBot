@@ -1,4 +1,4 @@
-from Config import SYMBOL, IS_REAL_TRADER, THREADS
+from Config import SYMBOL, IS_REAL_TRADER
 from time import sleep
 from DataBase import DATABASE
 from Binance import Binance
@@ -16,22 +16,15 @@ class Trader:
     def buy(self):
         if IS_REAL_TRADER:
             if self.binance.buy(SYMBOL):
-                self.save_trade()
+                self.trades.set_trades()
 
     def sell(self):
         if IS_REAL_TRADER:
             if self.binance.sell(SYMBOL):
-                self.save_trade()
-
-
-    def save_trade(self):
-        last_trades = self.binance.get_last_trade(SYMBOL)
-        for trade in last_trades:
-            trade_id = trade['id']
-            self.trades.add_trade(self.id, trade_id)
+                self.trades.set_trades()
 
     def get_results(self):
-        dataframe = self.trades.get_trades_dataframe()
+        dataframe = self.trades.trades
         results = Results(dataframe)
         return str(results)
 
@@ -43,129 +36,49 @@ class Trades:
     def __init__(self, binance, trader_id):
         self.trader_id = trader_id
         self.binance = binance
-        self.trades = self._get_trades() if trader_id is not None else list()
-
-    def add_trade(self, trader_id, trade_id):
-        data = self.binance.get_trade_with_id(symbol=SYMBOL, trade_id=trade_id)
-        price, quote_qty, time, is_buyer = (
-            float(data['price']),
-            float(data['quoteQty']),
-            int(data['time']),
-            data['isBuyer']
-        )
-        DATABASE.insert(
-            'trades',
-            'trader_id,trade_id,symbol,price,quote_qty,time,is_buyer',
-            f"{trader_id},{trade_id},'{SYMBOL}',{price},{quote_qty},{time},{is_buyer}"
-        )
-        #self.trades = self._get_trades()
-        self.trades.append(self.Trade([None, trader_id, trade_id, SYMBOL, price, quote_qty, time, is_buyer], self.binance))
+        self.trades = self._get_trades()
 
     def _get_trades(self):
-        trades = list()
-        data = DATABASE.select_with('trades', 'trader_id', self.trader_id)
-        for trade in data:
-            trades.append(self.Trade(trade, self.binance))
-        return trades
+        trades = self.binance.get_trade(SYMBOL)
+        trade_list = list()
+        for trade in trades:
+            trade_list.append(self.Trade(trade))
+        trade_list.sort(key=self._get_trade_time)
+        data = self._get_trades_dataframe(trade_list)
+        return data
 
     def get_trades(self):
         return self.trades
 
-    def get_trade_id(self):
-        ids = []
-        for trade in self.trades:
-            ids.append(trade.trade_id)
-        return ids
+    def set_trades(self):
+        self.trades = self._get_trades()
 
-    def get_trade_by_id(self, trade_id):
-        for trade in self.trades:
-            if trade.trade_id == trade_id:
-                return trade
-
-    def _get_artificial_trade(self, key, trades):
-        mean, total, time = .0, .0, None
-        for trade in trades[key]:
-            print(type(total), type(trade.quote_qty))
-            total += float(trade.quote_qty)
-            time = trade.time
-        for trade in trades[key]:
-            mean += trade.price * (trade.quote_qty / total)
-        return mean, total, time
-
-    def _trim_trades(self, trades):
-        for i, trade in enumerate(trades):
-            if not trade.is_buyer:
-                trades.remove(trade)
-            else:
-                break
-
-    def _join_trades(self, all_trades):
-        for trade in all_trades:
-            if len(trade['buy']) > 1:
-                mean, qty, time = self._get_artificial_trade('buy', trade)
-                artificial_trade = self.Trade([None, self.trader_id, None, SYMBOL, mean, qty, time, True], self.binance)
-                trade['buy'] = artificial_trade
-            if len(trade['sell']) > 1:
-                mean, qty, time = self._get_artificial_trade('sell', trade)
-                artificial_trade = self.Trade([None, self.trader_id, None, SYMBOL, mean, qty, time, False], self.binance)
-                trade['sell'] = artificial_trade
-            if isinstance(trade['buy'], list):
-                trade['buy'] = trade['buy'][0]
-            if isinstance(trade['sell'], list):
-                trade['sell'] = trade['sell'][0]
-
-    def _make_pairs(self):
-        trades = self.trades.copy()
-        self._trim_trades(trades)
-        buy, sell = [], []
-        all_trades = []
-        for trade in trades:
-            if trade.is_buyer:
-                if buy and sell:
-                    all_trades.append({'buy': buy, 'sell': sell})
-                    buy, sell = [], []
-                buy.append(trade)
-            else:
-                sell.append(trade)
-        if buy and sell:
-            all_trades.append({'buy': buy, 'sell': sell})
-        return all_trades
-
-    def get_trades_dataframe(self):
-        self.sort()
+    def _get_trades_dataframe(self, trades):
         data = pd.DataFrame()
-        all_trades = self._make_pairs()
-        self._join_trades(all_trades)
 
-        for trade in all_trades:
+        for trade in trades:
             row = {
-                'buy_amount': trade['buy'].quote_qty,
-                'sell_amount': trade['sell'].quote_qty,
-                'buy_price': trade['buy'].price,
-                'sell_price': trade['sell'].price,
-                'buy_time': trade['buy'].get_time(),
-                'sell_time': trade['sell'].get_time(),
-                'symbol': trade['buy'].symbol
+                'id': trade.trade_id,
+                'qty': trade.quote_qty,
+                'price': trade.price,
+                'is_buyer': trade.is_buyer,
+                'time': trade.get_time(),
+                'symbol': trade.symbol
             }
             data = data.append(row, ignore_index=True)
         return data
-
-    def sort(self):
-        self.trades.sort(key=self._get_trade_time)
 
     def _get_trade_time(self, trade):
         return trade.time
 
     class Trade:
-        def __init__(self, trade, binance):
-            self.binance = binance
-            self.trader_id = trade[1]
-            self.trade_id = trade[2]
-            self.symbol = trade[3].strip()
-            self.price = float(trade[4])
-            self.quote_qty = float(trade[5])
-            self.time = trade[6]
-            self.is_buyer = trade[7]
+        def __init__(self, trade):
+            self.trade_id = trade['id']
+            self.symbol = trade['symbol']
+            self.price = float(trade['price'])
+            self.quote_qty = float(trade['quoteQty'])
+            self.time = trade['time']
+            self.is_buyer = trade['isBuyer']
 
         def get_time(self):
             return datetime.fromtimestamp(int(str(self.time)) / 1000)
@@ -186,7 +99,7 @@ def get_all_traders():
 def get_results():
     array = list()
     for trader in TRADERS:
-        data = trader.trades.get_trades_dataframe()
+        data = trader.trades.trades
         results = str(Results(data))
         msg = '#' * 25 + f'\nTrader: {trader.name.upper()}\n'
         msg += results
@@ -195,25 +108,12 @@ def get_results():
     return array
 
 def get_trades():
-    aux_trades = Trades(None, None)
+    dataframe = pd.DataFrame()
     for trader in TRADERS:
-        aux_trades.trades = aux_trades.trades + trader.trades.trades
-    aux_trades.sort()
-    dataframe = aux_trades.get_trades_dataframe()
+        dataframe = pd.concat([dataframe, trader.trades.trades], axis=0, ignore_index=True)
     path = 'trades.csv'
     dataframe.to_csv(path)
     return path
-
-"""
-def get_results():
-    aux_trades = Trades(None, None)
-    for trader in TRADERS:
-        aux_trades.trades = aux_trades.trades + trader.trades.trades
-    aux_trades.sort()
-    dataframe = aux_trades.get_trades_dataframe()
-    results = Results(dataframe)
-    return str(results)
-"""
 
 TRADERS = get_all_traders()
 
