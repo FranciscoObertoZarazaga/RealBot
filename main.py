@@ -11,7 +11,7 @@ WS.subscribe(BOT)
 
 THREADS.update({'bot': Thread(target=WS.run, name='bot')})
 THREADS.update({'telegram': Thread(target=TELEGRAM.run, name='telegram')})
-THREADS.update({'tester': Thread(target=TESTER.run, name='tester')})
+#THREADS.update({'tester': Thread(target=TESTER.run, name='tester')})
 
 for thread in THREADS.values():
     thread.start()
