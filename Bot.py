@@ -38,7 +38,6 @@ class Bot:
                 buy_threads.append(Thread(target=trader.buy))
             for thread in buy_threads:
                 thread.start()
-            WS.restart(1800)
 
     def all_sell(self):
         if not self.notified['sell']:
@@ -49,7 +48,6 @@ class Bot:
                 sell_threads.append(Thread(target=trader.sell()))
             for thread in sell_threads:
                 thread.start()
-            WS.restart(1800)
 
 
 BOT = Bot()
