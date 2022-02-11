@@ -28,8 +28,8 @@ class Trader:
         results = Results(dataframe)
         return str(results)
 
-    def wait(self):
-        sleep(10)
+    def get_last_trade(self):
+        return self.binance.get_last_trade(SYMBOL)
 
 
 class Trades:

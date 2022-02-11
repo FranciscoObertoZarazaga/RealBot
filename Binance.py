@@ -135,6 +135,9 @@ class Binance:
         return self.client.get_my_trades(symbol=symbol, fromId=trade_id, limit=limit)
 
     def get_last_trade(self, symbol):
+        return self.get_trade(symbol, limit=1)[0]
+
+    '''def get_last_trade(self, symbol):
         last_trades = list()
         trades = self.get_trade(symbol)
         last_trade = trades[-1]
@@ -144,7 +147,7 @@ class Binance:
                 last_trades.append(trade)
             else:
                 break
-        return reversed(last_trades)
+        return reversed(last_trades)'''
 
     def get_trade_with_id(self, symbol, trade_id):
         return self.get_trade(symbol, trade_id=trade_id, limit=1)[0]

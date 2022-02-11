@@ -19,7 +19,7 @@ class Tester:
     def test(self):
         test_ws = self.test_ws()
         msg = f'State: {"On" if test_ws else "Off"}\nLast update: {self.last_activity}'
-        diagnostic = {'test_ws':test_ws, 'last_activity':self.last_activity, 'msg':msg}
+        diagnostic = {'test_ws': test_ws, 'last_activity': self.last_activity, 'msg': msg}
         return diagnostic
 
     def run(self):
