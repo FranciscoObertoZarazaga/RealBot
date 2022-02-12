@@ -17,8 +17,10 @@ class Bot:
         kline = self.kl.getKlines()
         points = 0
         points += SqueezeStrategy(kline)
-        status = self.get_status()
+        status = self.get_last_trade()
         self.notify(status)
+        if status:
+            self.all_set_stop_loss()
 
         if points > 0:
             self.all_buy()
@@ -44,6 +46,13 @@ class Bot:
         for thread in sell_threads:
             thread.start()
 
+    def all_set_stop_loss(self):
+        sell_threads = list()
+        for trader in TRADERS:
+            sell_threads.append(Thread(target=trader.set_stop_loss()))
+        for thread in sell_threads:
+            thread.start()
+
     def notify(self, status):
         if self.last_status is None:
             return 0
@@ -53,10 +62,8 @@ class Bot:
             else:
                 TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
 
-
-    def get_status(self):
+    def get_last_trade(self):
         return TRADERS[0].get_last_trade()['isBuyer']
-
 
 
 BOT = Bot()

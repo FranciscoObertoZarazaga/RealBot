@@ -60,8 +60,6 @@ class Results:
     def __str__(self):
         msg = ''
         trades = self.trades.copy()
-        with pd.option_context('display.max_rows', None, 'display.max_columns',None):
-            print(trades)
         results = self._set_all(trades)
         reward = sum(results['reward'])
         n_trades, n_positive_trades, n_negative_trades = self._get_number_of_trades(results)
@@ -75,7 +73,6 @@ class Results:
         daily_performance = performance / time.days
         monthly_performance = daily_performance * 30
         annual_performance = daily_performance * 365
-        print(results)
 
         msg += '#' * 25 + '\n'
         msg += f'TRADEANDO DURANTE\n'

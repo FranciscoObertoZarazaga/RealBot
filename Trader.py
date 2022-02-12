@@ -1,27 +1,31 @@
-from Config import SYMBOL, IS_REAL_TRADER
-from time import sleep
+from Config import IS_REAL_TRADER
 from DataBase import DATABASE
 from Binance import Binance
 from datetime import datetime
 from Results import Results
 import pandas as pd
 
+
 class Trader:
-    def __init__(self, id, name, api_key, secret_key):
-        self.id = id
+    def __init__(self, trader_id, name, api_key, secret_key):
+        self.id = trader_id
         self.name = name
         self.binance = Binance(api_key=api_key, secret_key=secret_key)
         self.trades = Trades(self.binance, self.id)
 
     def buy(self):
         if IS_REAL_TRADER:
-            if self.binance.buy(SYMBOL):
+            if self.binance.buy():
                 self.trades.set_trades()
+                self.set_stop_loss()
 
     def sell(self):
         if IS_REAL_TRADER:
-            if self.binance.sell(SYMBOL):
+            if self.binance.sell():
                 self.trades.set_trades()
+
+    def set_stop_loss(self):
+        self.binance.stop_loss()
 
     def get_results(self):
         dataframe = self.trades.trades
@@ -29,7 +33,7 @@ class Trader:
         return str(results)
 
     def get_last_trade(self):
-        return self.binance.get_last_trade(SYMBOL)
+        return self.binance.get_last_trade()
 
 
 class Trades:
@@ -39,7 +43,7 @@ class Trades:
         self.trades = self._get_trades()
 
     def _get_trades(self):
-        trades = self.binance.get_trade(SYMBOL)
+        trades = self.binance.get_trade()
         trade_list = list()
         for trade in trades:
             trade_list.append(self.Trade(trade))
@@ -88,11 +92,11 @@ def get_all_traders():
     data = DATABASE.select('trader')
     traders = list()
     for trader in data:
-        id = trader[0]
+        trader_id = trader[0]
         name = trader[1].strip()
         api_key = trader[2].strip()
         secret_key = trader[3].strip()
-        traders.append(Trader(id=id, name=name, api_key=api_key, secret_key=secret_key))
+        traders.append(Trader(trader_id=trader_id, name=name, api_key=api_key, secret_key=secret_key))
     return traders
 
 
@@ -107,6 +111,7 @@ def get_results():
         array.append(msg)
     return array
 
+
 def get_trades():
     dataframe = pd.DataFrame()
     for trader in TRADERS:
@@ -115,22 +120,5 @@ def get_trades():
     dataframe.to_csv(path)
     return path
 
+
 TRADERS = get_all_traders()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

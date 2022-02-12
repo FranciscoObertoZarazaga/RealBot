@@ -20,7 +20,7 @@ class Klines:
 
     def _download(self):
         colums, times = ['Time','Open','High','Low','Close','Volume','ignore','ignore','ignore','ignore','ignore','ignore'], list()
-        self.klines = pd.DataFrame(BINANCE.get_k_lines(symbol=SYMBOL,interval=INTERVAL,limit=41),columns=colums)
+        self.klines = pd.DataFrame(BINANCE.get_k_lines(limit=41), columns=colums)
         self.klines['times'] = self.klines['Time']
         [times.append(datetime.fromtimestamp(int(str(time))/1000).strftime('%H:%M %d-%m-%Y')) for time in self.klines['Time']]
         self.klines['Time'] = times
