@@ -21,7 +21,7 @@ class Bot:
         points += SqueezeStrategy(kline)
         status = self.get_last_trade()
         self.notify(status)
-        if status and random.randint(5) == 1:
+        if status and random.randint(0, 5) == 1:
             self.all_set_stop_loss()
 
         if points > 0:
