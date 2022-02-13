@@ -82,7 +82,7 @@ class Binance:
 
     def sell(self):
         try:
-            minQty, maxQty, stepSize = self.get_sell_filters()
+            minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = self.get_sell_filters()
             crypto = self.getbtc()
             crypto = crypto - crypto % stepSize
             if crypto >= minQty and crypto <= maxQty:
@@ -103,7 +103,7 @@ class Binance:
             if last_price <= last_stop_price:
                 return 0
             self.delete_all_orders()
-        minPrice, maxPrice, tickSize = BINANCE.get_stop_loss_filters()
+        minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = self.get_sell_filters()
         stop_price = last_price * .98
         limit_price = stop_price * .95
         precision = len(str(tickSize)) - len(str(round(tickSize))) - 1
@@ -111,8 +111,7 @@ class Binance:
         limit_price = round(limit_price, precision)
         if stop_price >= maxPrice and stop_price <= minPrice and limit_price >= maxPrice and limit_price <= minPrice:
             return 0
-        minQty, maxQty, stepSize = BINANCE.get_sell_filters()
-        crypto = BINANCE.getbtc()
+        crypto = self.getbtc()
         crypto = crypto - crypto % stepSize
         try:
             if crypto >= minQty and crypto <= maxQty:
@@ -182,17 +181,13 @@ class Binance:
 
     def get_sell_filters(self):
         filters = self.getFilters()
+        minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = range(6)
         for filter in filters:
             if filter['filterType'] == 'LOT_SIZE':
-                minQty, maxQty, stepSize = filter['minQty'], filter['maxQty'], filter['stepSize']
-                return float(minQty), float(maxQty), float(stepSize)
-
-    def get_stop_loss_filters(self):
-        filters = self.getFilters()
-        for filter in filters:
+                minQty, maxQty, stepSize = float(filter['minQty']), float(filter['maxQty']), float(filter['stepSize'])
             if filter['filterType'] == 'PRICE_FILTER':
-                minPrice, maxPrice, tickSize = filter['minPrice'], filter['maxPrice'], filter['tickSize']
-                return float(minPrice), float(maxPrice), float(tickSize)
+                minPrice, maxPrice, tickSize = float(filter['minPrice']), float(filter['maxPrice']), float(filter['tickSize'])
+        return minQty, maxQty, stepSize, minPrice, maxPrice, tickSize
 
     def get_trade(self, trade_id=None, limit=None):
         return self.client.get_my_trades(symbol=SYMBOL, fromId=trade_id, limit=limit)
