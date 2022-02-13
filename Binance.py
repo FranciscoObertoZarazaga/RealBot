@@ -103,8 +103,14 @@ class Binance:
             if last_price < last_stop_price:
                 return 0
         self.delete_all_orders()
+        minPrice, maxPrice, tickSize = BINANCE.get_stop_loss_filters()
         stop_price = last_price * .98
         limit_price = stop_price * .95
+        precision = len(str(tickSize)) - len(str(round(tickSize))) - 1
+        stop_price = round(stop_price, precision)
+        limit_price = round(limit_price, precision)
+        if stop_price >= minPrice and stop_price <= maxPrice and limit_price >= minPrice and limit_price <= maxPrice:
+            return 0
         minQty, maxQty, stepSize = BINANCE.get_sell_filters()
         crypto = BINANCE.getbtc()
         crypto = crypto - crypto % stepSize
@@ -137,7 +143,7 @@ class Binance:
         orders = self.get_all_open_orders()
         if len(orders) == 0:
             return None
-        return orders[-1]['stopPrice']
+        return float(orders[-1]['stopPrice'])
 
     def getusdt(self):
         return self.getCrypto('USDT')
@@ -180,6 +186,13 @@ class Binance:
             if filter['filterType'] == 'LOT_SIZE':
                 minQty, maxQty, stepSize = filter['minQty'], filter['maxQty'], filter['stepSize']
                 return float(minQty), float(maxQty), float(stepSize)
+
+    def get_stop_loss_filters(self):
+        filters = self.getFilters()
+        for filter in filters:
+            if filter['filterType'] == 'PRICE_FILTER':
+                minPrice, maxPrice, tickSize = filter['minPrice'], filter['maxPrice'], filter['tickSize']
+                return float(minPrice), float(maxPrice), float(tickSize)
 
     def get_trade(self, trade_id=None, limit=None):
         return self.client.get_my_trades(symbol=SYMBOL, fromId=trade_id, limit=limit)
