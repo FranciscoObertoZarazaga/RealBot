@@ -73,8 +73,7 @@ class Binance:
                 self.client.order_market_buy(
                     symbol=SYMBOL,
                     quoteOrderQty=usdt,
-                    newOrderRespType='ACK',
-                    timeInForce=TIME_IN_FORCE_GTC
+                    newOrderRespType='ACK'
                 )
                 return True
             return False
@@ -90,8 +89,7 @@ class Binance:
                 self.client.order_market_sell(
                     symbol=SYMBOL,
                     quantity=crypto,
-                    newOrderRespType='ACK',
-                    timeInForce=TIME_IN_FORCE_GTC
+                    newOrderRespType='ACK'
                 )
                 return True
             return False
