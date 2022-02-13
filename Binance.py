@@ -102,7 +102,7 @@ class Binance:
         if last_stop_price is not None:
             if last_price <= last_stop_price:
                 return 0
-        self.delete_all_orders()
+            self.delete_all_orders()
         minPrice, maxPrice, tickSize = BINANCE.get_stop_loss_filters()
         stop_price = last_price * .98
         limit_price = stop_price * .95
