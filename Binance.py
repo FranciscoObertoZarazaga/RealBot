@@ -109,7 +109,7 @@ class Binance:
         precision = len(str(tickSize)) - len(str(round(tickSize))) - 1
         stop_price = round(stop_price, precision)
         limit_price = round(limit_price, precision)
-        if stop_price >= minPrice and stop_price <= maxPrice and limit_price >= minPrice and limit_price <= maxPrice:
+        if stop_price >= maxPrice and stop_price <= minPrice and limit_price >= maxPrice and limit_price <= minPrice:
             return 0
         minQty, maxQty, stepSize = BINANCE.get_sell_filters()
         crypto = BINANCE.getbtc()
