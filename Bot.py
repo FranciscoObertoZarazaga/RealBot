@@ -5,6 +5,7 @@ from Trader import TRADERS
 from threading import Thread
 from Tester import TESTER
 import Telegram
+from time import sleep
 
 
 class Bot:
@@ -25,6 +26,7 @@ class Bot:
 
                 self.last_status = status
                 TESTER.set_last_activity()
+                sleep(30)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)
                 exit(-1)
