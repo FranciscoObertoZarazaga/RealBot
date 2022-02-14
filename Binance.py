@@ -1,12 +1,9 @@
 from time import sleep
 from binance.client import Client
-from binance import ThreadedWebsocketManager
 from binance.enums import *
 from datetime import datetime
-from Observed import Observed
 from Config import SYMBOL, INTERVAL
-from threading import Thread
-from Config import THREADS
+
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
@@ -198,44 +195,7 @@ class Binance:
     def get_trade_with_id(self, trade_id):
         return self.get_trade(SYMBOL, trade_id=trade_id, limit=1)[0]
 
-class WebSocketBinance(Observed):
-    def __init__(self):
-        super(WebSocketBinance, self).__init__()
-        self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
-        self.kline_socket = None
-
-    def run(self):
-        if not self.ws.is_alive():
-            self.ws.start()
-            self.kline_socket = self.ws.start_kline_socket(callback=self.notify, symbol=SYMBOL,interval=INTERVAL)
-            self.ws.join()
-
-    def start(self):
-        THREADS.update({'bot': Thread(target=self.run, name='bot')})
-        THREADS['bot'].start()
-
-    def stop(self):
-        if self.ws.is_alive():
-            assert self.kline_socket is not None
-            self.ws.stop_socket(self.kline_socket)
-            self.ws.stop()
-            self.ws = ThreadedWebsocketManager(api_key=API_KEY, api_secret=SECRET_KEY)
-
-    def restart(self, t=0):
-        self.stop()
-        sleep(t)
-        self.start()
-
-
-    def notify(self,data):
-        try:
-            super().notify(data)
-        except Exception as e:
-            print(e)
-            self.restart()
-
 
 BINANCE = Binance()
-WS = WebSocketBinance()
 
 

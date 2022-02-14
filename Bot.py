@@ -1,38 +1,44 @@
-import random
-
+from Config import THREADS
 from Klines import Klines
 from Strategy import *
 from Trader import TRADERS
 from threading import Thread
 from Tester import TESTER
-from Telegram import TELEGRAM
+import Telegram
 
 
 class Bot:
     def __init__(self):
-        super(Bot, self).__init__()
         self.kl = Klines()
+        self.on = True
         self.last_status = None
 
     def run(self):
+        while self.on:
+            try:
+                action = self.analyze()
+                self.do(action)
+                status = self.get_status()
+                self.notify(status)
+                if status:
+                    self.all_set_stop_loss()
+
+                self.last_status = status
+                TESTER.set_last_activity()
+            except Exception as e:
+                Telegram.TELEGRAM.notify(e)
+                exit(-1)
+
+    def analyze(self):
         self.kl.load()
         kline = self.kl.getKlines()
-        points = 0
-        points += SqueezeStrategy(kline)
-        status = self.get_last_trade()
-        self.notify(status)
-        if status:
-            pass#self.all_set_stop_loss()
+        return SqueezeStrategy(kline)
 
-        if points > 0:
+    def do(self, action):
+        if action > 0:
             self.all_buy()
-        if points < 0:
+        if action < 0:
             self.all_sell()
-        self.last_status = status
-        TESTER.set_last_activity()
-
-    def update(self, _):
-        self.run()
 
     def all_buy(self):
         buy_threads = list()
@@ -60,12 +66,27 @@ class Bot:
             return 0
         if self.last_status != status:
             if status is True:
-                TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+                Telegram.TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
             else:
-                TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+                Telegram.TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
 
-    def get_last_trade(self):
+    def get_status(self):
         return TRADERS[0].get_last_trade()['isBuyer']
+
+    def start(self):
+        if not THREADS['bot'].is_alive():
+            self.on = True
+            THREADS.update({'bot': Thread(target=self.run, name='bot')})
+            THREADS['bot'].start()
+
+    def stop(self):
+        if THREADS['bot'].is_alive():
+            self.on = False
+            THREADS['bot'].join()
+
+    def restart(self):
+        self.stop()
+        self.start()
 
 
 BOT = Bot()

@@ -2,7 +2,6 @@ from datetime import datetime
 from Binance import BINANCE
 from SqueezeMomentumIndicator import SqueezeMomentumIndicator
 from Indicator import *
-from Config import SYMBOL, INTERVAL
 
 class Klines:
     def __init__(self):

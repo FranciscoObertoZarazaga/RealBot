@@ -4,7 +4,7 @@ from Tester import TESTER
 from time import sleep
 from User import USERS
 from Trader import get_results, get_trades
-from Binance import WS
+import Bot
 from Trader import TRADERS
 from threading import Thread
 
@@ -186,20 +186,20 @@ class BotTelegram:
     def turn_on(self, update: Update, context: CallbackContext) -> None:
         if self.verify(update):
             Message.delete(update.message)
-            WS.start()
+            Bot.BOT.start()
             update.message.reply_text('On')
 
     def turn_off(self, update: Update, context: CallbackContext) -> None:
         if self.verify(update):
             Message.delete(update.message)
-            WS.stop()
+            Bot.BOT.stop()
             update.message.reply_text('Off')
 
     def reset(self, update: Update, context: CallbackContext) -> None:
         if self.verify(update):
             Message.delete(update.message)
             update.message.reply_text('Restarting...')
-            WS.restart()
+            Bot.BOT.restart()
             update.message.reply_text('On')
 
     def all_buy(self, update: Update, context: CallbackContext):
