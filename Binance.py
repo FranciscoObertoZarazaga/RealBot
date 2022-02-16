@@ -8,33 +8,27 @@ from Config import SYMBOL, INTERVAL
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
 SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
 
+
 class Binance:
 
     def __init__(self, api_key=API_KEY, secret_key=SECRET_KEY):
         self.client = Client(api_key, secret_key)
 
-    def getAllTickers(self):
-        return self.client.get_all_tickers()
-
-    #Retorna un listado de cryptomonedas disponibles en Binance
-    def getAllCoins(self):
-        return self.client.get_all_coins_info()
-
-    def getClient(self):
+    def get_client(self):
         return self.client
 
-    def getStatus(self):
+    def get_status(self):
         return self.client.get_system_status()
 
     #Devuelve el libro de órdenes de compra y venta.
     #El Bid price es el precio máximo al que un consumidor está dispuesto a comprar
     # El Ask price es el precio mínimo al que un oferente está dispuesto a vender
-    def getOrderBook(self):
+    def get_order_book(self):
         try:
-            return self.client.get_order_book(symbol=SYMBOL,limit="1000")
+            return self.client.get_order_book(symbol=SYMBOL, limit="1000")
         except:
             self.reconnect()
-            return self.getOrderBook()
+            return self.get_order_book()
 
     def get_mean(self):
         try:
@@ -52,9 +46,6 @@ class Binance:
             self.reconnect()
             return self.get_price()
 
-    def get_historical_k_lines(self,start_str,end_str=None):
-        return self.client.get_historical_klines_generator(SYMBOL, INTERVAL, start_str,end_str)
-
     def get_k_lines(self, limit):
         try:
             return self.client.get_klines(symbol=SYMBOL, interval=INTERVAL, limit=limit)
@@ -64,32 +55,34 @@ class Binance:
 
     def buy(self):
         try:
-            minNotional = self.getMinNotional()
-            usdt = self.getusdt()
-            if usdt >= minNotional:
-                self.client.order_market_buy(
-                    symbol=SYMBOL,
-                    quoteOrderQty=usdt,
-                    newOrderRespType='ACK'
-                )
-                return True
-            return False
+            min_notional = self.get_min_notional()
+            usdt = self.get_usdt()
+            if usdt < min_notional:
+                return False
+            self.client.order_market_buy(
+                symbol=SYMBOL,
+                quoteOrderQty=usdt,
+                newOrderRespType='ACK'
+            )
+            return True
         except Exception as e:
             print(e)
 
     def sell(self):
         try:
-            minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = self.get_sell_filters()
-            crypto = self.getbtc()
-            crypto = crypto - crypto % stepSize
-            if crypto >= minQty and crypto <= maxQty:
-                self.client.order_market_sell(
-                    symbol=SYMBOL,
-                    quantity=crypto,
-                    newOrderRespType='ACK'
-                )
-                return True
-            return False
+            min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
+            crypto = self.get_btc()
+            crypto = crypto - crypto % step_size
+            if crypto < min_qty:
+                return False
+            if crypto > max_qty:
+                return False
+            self.client.order_market_sell(
+                symbol=SYMBOL,
+                quantity=crypto,
+                newOrderRespType='ACK'
+            )
+            return True
         except Exception as e:
             print(e)
 
@@ -100,27 +93,28 @@ class Binance:
             if last_price <= last_stop_price:
                 return 0
             self.delete_all_orders()
-        minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = self.get_sell_filters()
+        min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
         stop_price = last_price * .98
         limit_price = stop_price * .95
-        precision = len(str(tickSize)) - len(str(round(tickSize))) - 1
+        precision = len(str(tick_size)) - len(str(round(tick_size))) - 1
         stop_price = round(stop_price, precision)
         limit_price = round(limit_price, precision)
-        if stop_price >= maxPrice and stop_price <= minPrice and limit_price >= maxPrice and limit_price <= minPrice:
+        if stop_price >= max_price or stop_price <= min_price or limit_price >= max_price or limit_price <= min_price:
             return 0
-        crypto = self.getbtc()
-        crypto = crypto - crypto % stepSize
+        crypto = self.get_btc()
+        crypto = crypto - crypto % step_size
+        if crypto <= min_qty or crypto >= max_qty:
+            return 0
         try:
-            if crypto >= minQty and crypto <= maxQty:
-                self.client.create_order(
-                    symbol=SYMBOL,
-                    side=SIDE_SELL,
-                    type=ORDER_TYPE_STOP_LOSS_LIMIT,
-                    quantity=crypto,
-                    timeInForce=TIME_IN_FORCE_GTC,
-                    price=limit_price,
-                    stopPrice=stop_price
-                )
+            self.client.create_order(
+                symbol=SYMBOL,
+                side=SIDE_SELL,
+                type=ORDER_TYPE_STOP_LOSS_LIMIT,
+                quantity=crypto,
+                timeInForce=TIME_IN_FORCE_GTC,
+                price=limit_price,
+                stopPrice=stop_price
+            )
         except Exception as e:
             print(e)
 
@@ -141,59 +135,53 @@ class Binance:
             return None
         return float(orders[-1]['stopPrice'])
 
-    def getusdt(self):
-        return self.getCrypto('USDT')
+    def get_usdt(self):
+        return self.get_crypto('USDT')
 
-    def getbtc(self):
-        return self.getCrypto('BTC')
+    def get_btc(self):
+        return self.get_crypto('BTC')
 
-    def getCrypto(self,asset):
+    def get_crypto(self, asset):
         return float(self.client.get_asset_balance(asset=asset)['free'])
 
     def reconnect(self,n=1):
         try:
-            if n==1:
+            if n == 1:
                 print("Reconectando")
-            self.getStatus()
+            self.get_status()
         except:
             sleep(10)
             self.reconnect(0)
 
-    def alert(self,msg):
-        print('Recibido',msg)
-
-    def getTime(self):
+    def get_time(self):
         return datetime.fromtimestamp(self.client.get_server_time()['serverTime'] / 1000).strftime('%H:%M %d-%m-%Y')
 
-    def getFilters(self):
+    def get_filters(self):
         return self.client.get_symbol_info(symbol=SYMBOL)['filters']
 
-    def getMinNotional(self):
-        minNotional = None
-        filters = self.getFilters()
-        for filter in filters:
-            if filter['filterType'] == 'MIN_NOTIONAL':
-                minNotional = filter['minNotional']
-        return float(minNotional)
+    def get_min_notional(self):
+        min_notional = None
+        filters = self.get_filters()
+        for binance_filter in filters:
+            if binance_filter['filterType'] == 'MIN_NOTIONAL':
+                min_notional = binance_filter['minNotional']
+        return float(min_notional)
 
     def get_sell_filters(self):
-        filters = self.getFilters()
-        minQty, maxQty, stepSize, minPrice, maxPrice, tickSize = range(6)
-        for filter in filters:
-            if filter['filterType'] == 'LOT_SIZE':
-                minQty, maxQty, stepSize = float(filter['minQty']), float(filter['maxQty']), float(filter['stepSize'])
-            if filter['filterType'] == 'PRICE_FILTER':
-                minPrice, maxPrice, tickSize = float(filter['minPrice']), float(filter['maxPrice']), float(filter['tickSize'])
-        return minQty, maxQty, stepSize, minPrice, maxPrice, tickSize
+        filters = self.get_filters()
+        min_qty, max_qty, step_size, min_price, max_price, tick_size = range(6)
+        for binance_filter in filters:
+            if binance_filter['filterType'] == 'LOT_SIZE':
+                min_qty, max_qty, step_size = float(binance_filter['minQty']), float(binance_filter['maxQty']), float(binance_filter['stepSize'])
+            if binance_filter['filterType'] == 'PRICE_FILTER':
+                min_price, max_price, tick_size = float(binance_filter['minPrice']), float(binance_filter['maxPrice']), float(binance_filter['tickSize'])
+        return min_qty, max_qty, step_size, min_price, max_price, tick_size
 
     def get_trade(self, trade_id=None, limit=None):
         return self.client.get_my_trades(symbol=SYMBOL, fromId=trade_id, limit=limit)
 
     def get_last_trade(self):
         return self.get_trade(limit=1)[0]
-
-    def get_trade_with_id(self, trade_id):
-        return self.get_trade(SYMBOL, trade_id=trade_id, limit=1)[0]
 
 
 BINANCE = Binance()

@@ -7,19 +7,22 @@ from Trader import get_results, get_trades
 import Bot
 from Trader import TRADERS
 from threading import Thread
+from tools.singleton import singleton
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = 0
 MSG = 0
 CONFIRM = 0
 
+
+@singleton
 class BotTelegram:
     def __init__(self):
         self.updater = Updater(TOKEN)
         self.dispatcher = self.updater.dispatcher
 
         ###REGISTER CONVERSATION###
-        entry_points = [CommandHandler('start',self.start)]
+        entry_points = [CommandHandler('start', self.start)]
         states = {
             ALIAS: [
                 MessageHandler(
@@ -28,7 +31,7 @@ class BotTelegram:
                 )
             ]
         }
-        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackRegisterCallback)]
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallback_register_callback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
         ###END REGISTER CONVERSATION####
 
@@ -43,7 +46,7 @@ class BotTelegram:
                 CommandHandler('cancel', self.cancel)
             ]
         }
-        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackDiffusionCallback)]
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallback_diffusion_callback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
         ###END DIFFUSION CONVERSATION###
 
@@ -55,7 +58,7 @@ class BotTelegram:
                 CommandHandler('cancel', self.cancel)
             ]
         }
-        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackTransactionCallback)]
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallback_transaction_callback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
         ###END ALL_BUY CONVERSATION###
 
@@ -67,7 +70,7 @@ class BotTelegram:
                 CommandHandler('cancel', self.cancel)
             ]
         }
-        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallbackTransactionCallback)]
+        fallbacks = [MessageHandler(filters=Filters.all, callback=self.fallback_transaction_callback)]
         self.dispatcher.add_handler(ConversationHandler(entry_points, states, fallbacks))
         ###END ALL_SELL CONVERSATION###
 
@@ -86,18 +89,18 @@ class BotTelegram:
 
     def run(self):
         self.updater.start_polling()
-        #self.updater.idle()
+        # self.updater.idle()
 
     def stop(self):
         self.updater.stop()
 
-    def state(self, update: Update, context: CallbackContext) -> None:
+    def state(self, update: Update, _):
         Message.delete(update.message)
         state = TESTER.test()['msg']
         resp = update.message.reply_text(state)
         Thread(target=self.clean, args=(resp, 10)).start()
 
-    def start(self, update: Update, context: CallbackContext) -> int:
+    def start(self, update: Update, context: CallbackContext):
         new_id = update.message.chat.id
 
         if USERS.is_registered(new_id):
@@ -111,7 +114,8 @@ class BotTelegram:
             update.message.reply_text('Enter your name')
             return ALIAS
 
-    def help(self, update: Update, context: CallbackContext) -> None:
+    @staticmethod
+    def help(update: Update, _):
         Message.delete(update.message)
         buttons = [
             [
@@ -136,23 +140,23 @@ class BotTelegram:
             ]
         ]
 
-        keyboardMarkup = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
+        keyboard_markup = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
 
         msg = 'Comandos'
-        update.message.reply_text(msg, reply_markup=keyboardMarkup)
+        update.message.reply_text(msg, reply_markup=keyboard_markup)
 
     def notify(self, msg):
-        for id in USERS.get_IDs():
-            self.updater.bot.send_message(id, msg)
+        for user_id in USERS.get_IDs():
+            self.updater.bot.send_message(user_id, msg)
 
-    def diffusion(self, update: Update, context: CallbackContext) -> int:
+    def diffusion(self, update: Update, _):
         if self.verify(update):
             update.message.reply_text('What message do you want to spread?\nEnter /cancel to exit')
             return MSG
         else:
             return ConversationHandler.END
 
-    def _diffusion(self, update: Update, context: CallbackContext) -> None:
+    def _diffusion(self, update: Update, _):
         user = USERS.get_user(update.message.chat.id)
         for user_id in USERS.get_IDs():
             if user_id != user.id:
@@ -168,7 +172,7 @@ class BotTelegram:
         self.help(update, callback)
         return ConversationHandler.END
 
-    def results(self, update: Update, context: CallbackContext) -> None:
+    def results(self, update: Update, _):
         Message.delete(update.message)
         results = get_results()
         msg = ''
@@ -177,32 +181,33 @@ class BotTelegram:
         resp = update.message.reply_text(msg)
         Thread(target=self.clean, args=(resp, 60)).start()
 
-    def trades(self, update: Update, context: CallbackContext) -> None:
+    def trades(self, update: Update, _):
         Message.delete(update.message)
         path = get_trades()
         resp = update.message.reply_document(document=open(path))
         Thread(target=self.clean, args=(resp, 60)).start()
 
-    def turn_on(self, update: Update, context: CallbackContext) -> None:
+    def turn_on(self, update: Update, _):
         if self.verify(update):
             Message.delete(update.message)
             Bot.BOT.start()
             update.message.reply_text('On')
 
-    def turn_off(self, update: Update, context: CallbackContext) -> None:
+    def turn_off(self, update: Update, _):
         if self.verify(update):
             Message.delete(update.message)
             Bot.BOT.stop()
             update.message.reply_text('Off')
 
-    def reset(self, update: Update, context: CallbackContext) -> None:
+    def reset(self, update: Update, _):
         if self.verify(update):
             Message.delete(update.message)
             update.message.reply_text('Restarting...')
             Bot.BOT.restart()
             update.message.reply_text('On')
 
-    def all_buy(self, update: Update, context: CallbackContext):
+    @staticmethod
+    def all_buy(update: Update, _):
         buy_threads = list()
         for trader in TRADERS:
             buy_threads.append(Thread(target=trader.buy))
@@ -212,7 +217,8 @@ class BotTelegram:
         update.message.reply_text('All traders bought')
         return ConversationHandler.END
 
-    def all_sell(self, update: Update, context: CallbackContext):
+    @staticmethod
+    def all_sell(update: Update, _):
         sell_threads = list()
         for trader in TRADERS:
             sell_threads.append(Thread(target=trader.sell()))
@@ -222,11 +228,12 @@ class BotTelegram:
         update.message.reply_text('All traders sold')
         return ConversationHandler.END
 
-    def clean(self, msg, t=60):
+    @staticmethod
+    def clean(msg, t=60):
         sleep(t)
         Message.delete(msg)
 
-    def confirm(self, update: Update, context: CallbackContext):
+    def confirm(self, update: Update, _):
         if self.verify(update):
             update.message.reply_text('Enter /confirm to perform the action')
             update.message.reply_text('Enter /cancel to abort')
@@ -234,24 +241,32 @@ class BotTelegram:
         else:
             return ConversationHandler.END
 
-    def verify(self, update):
+    @staticmethod
+    def verify(update):
         user = USERS.get_user(update.message.chat.id)
         is_god = user.is_god()
         if not is_god:
             update.message.reply_text("You don't have permission to perform this action")
         return is_god
 
-    def cancel(self, update, callback):
+    @staticmethod
+    def cancel(update, _):
         update.message.reply_text('Canceled')
         return ConversationHandler.END
 
-    def fallbackRegisterCallback(self, update, callback):
-        update.message.reply_text('The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
+    @staticmethod
+    def fallback_register_callback(update, _):
+        update.message.reply_text(
+            'The name entered is invalid. Remember that it must be between 3 and 15 characters. It cannot contain spaces, symbols, or numbers.')
 
-    def fallbackDiffusionCallback(self, update, callback):
-        update.message.reply_text('You cannot transmit this message, please enter a different one\nEnter /cancel to exit')
+    @staticmethod
+    def fallback_diffusion_callback(update, _):
+        update.message.reply_text(
+            'You cannot transmit this message, please enter a different one\nEnter /cancel to exit')
 
-    def fallbackTransactionCallback(self, update, callback):
+    @staticmethod
+    def fallback_transaction_callback(update, _):
         update.message.reply_text('error')
+
 
 TELEGRAM = BotTelegram()
