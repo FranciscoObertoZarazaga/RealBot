@@ -15,7 +15,6 @@ def WinStrategy(df, n=-1):
 
 def SqueezeStrategy(df, n=-1):
     sm = df['sm']
-    print(sm[n], sm[n - 1],sm[n - 2])
     isMin = sm[n] > sm[n - 1] and sm[n - 2] > sm[n - 1]
     isMax = sm[n] < sm[n - 1] and sm[n - 2] < sm[n - 1]
     if isMin:
