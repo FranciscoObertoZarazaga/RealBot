@@ -88,15 +88,16 @@ class Binance:
             print(e)
 
     def stop_loss(self):
+        stop_rate = .99
         _, last_price = self.get_price()
         last_stop_price = self.get_last_stop_price()
         if last_stop_price is not None:
-            if last_price <= last_stop_price:
+            if last_price * stop_rate <= last_stop_price:
                 return 0
             self.delete_all_orders()
         min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
-        stop_price = last_price * .98
-        limit_price = stop_price * .95
+        stop_price = last_price * stop_rate
+        limit_price = stop_price * stop_rate
         precision = len(str(tick_size)) - len(str(round(tick_size))) - 1
         stop_price = round(stop_price, precision)
         limit_price = round(limit_price, precision)
