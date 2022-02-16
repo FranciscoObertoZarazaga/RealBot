@@ -26,7 +26,7 @@ class Bot:
 
                 self.last_status = status
                 TESTER.set_last_activity()
-                sleep(30)
+                sleep(5)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)
                 exit(-1)
