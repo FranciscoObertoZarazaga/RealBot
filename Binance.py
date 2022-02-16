@@ -70,6 +70,7 @@ class Binance:
 
     def sell(self):
         try:
+            self.delete_all_orders()
             min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
             crypto = self.get_btc()
             crypto = crypto - crypto % step_size
