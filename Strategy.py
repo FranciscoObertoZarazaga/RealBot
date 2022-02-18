@@ -1,34 +1,18 @@
-def WinStrategy(df, n=-1):
-    adx = df['adx']
+def squeeze_strategy(df, n=-1):
     sm = df['sm']
-    sma = df['sma']
-    price = df['Close']
-    isMin = adx[n] > adx[n-1] and adx[n-2] > adx[n-1]
-    isUp = price[n] > sma[n]
-    isMagic = sm[n] > sm[n-1] or isUp
-
-    if isMin:
-        if adx[n-1] < 30:
-            return 1 if isMagic else -1
-    return 0
-
-
-def SqueezeStrategy(df, n=-1):
-    sm = df['sm']
-    isMin = sm[n] > sm[n - 1] and sm[n - 2] > sm[n - 1]
-    isMax = sm[n] < sm[n - 1] and sm[n - 2] < sm[n - 1]
-    if isMin:
+    is_min = sm[n] > sm[n - 1] and sm[n - 2] > sm[n - 1]
+    is_max = sm[n] < sm[n - 1] and sm[n - 2] < sm[n - 1]
+    if is_min:
         return 1
-    if isMax:
+    if is_max:
         return -1
     return 0
 
 
-def SqueezeBusterStrategy(df, n=-1):
+def squeeze_buster_strategy(df, n=-1):
     sm = df['sm']
     up = sm[n] > sm[n - 1]
 
     if up:
         return 1
     return -1
-

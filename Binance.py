@@ -88,7 +88,7 @@ class Binance:
             print(e)
 
     def stop_loss(self):
-        stop_rate = .99
+        stop_rate = .98
         _, last_price = self.get_price()
         last_stop_price = self.get_last_stop_price()
         if last_stop_price is not None:
@@ -103,8 +103,9 @@ class Binance:
         limit_price = round(limit_price, precision)
         if stop_price >= max_price or stop_price <= min_price or limit_price >= max_price or limit_price <= min_price:
             return 0
+        precision = len(str(step_size)) - len(str(round(step_size))) - 1
         crypto = self.get_btc()
-        crypto = crypto - crypto % step_size
+        crypto = round(crypto, precision)
         if crypto <= min_qty or crypto >= max_qty:
             return 0
         try:

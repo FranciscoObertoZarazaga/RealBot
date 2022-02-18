@@ -17,11 +17,11 @@ class Bot:
     def run(self):
         while self.on:
             try:
-                action = self.analyze()
+                action, down = self.analyze()
                 do(action)
                 status = get_status()
                 self.notify(status)
-                if status:
+                if status and down:
                     all_set_stop_loss()
 
                 self.last_status = status
@@ -33,8 +33,8 @@ class Bot:
 
     def analyze(self):
         self.kl.load()
-        kline = self.kl.getKlines()
-        return SqueezeStrategy(kline)
+        kline = self.kl.get_klines()
+        return squeeze_strategy(kline), kline['sm'][-1] < kline['sm'][-2]
 
     def notify(self, status):
         if self.last_status is None:

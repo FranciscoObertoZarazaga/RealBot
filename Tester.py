@@ -32,5 +32,3 @@ class Tester:
 
 
 TESTER = Tester()
-
-

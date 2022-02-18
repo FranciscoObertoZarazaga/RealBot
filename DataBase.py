@@ -1,5 +1,6 @@
 import psycopg2 as db
 
+
 class DataBase:
     def __init__(self):
         self.conection = db.connect(
@@ -12,7 +13,7 @@ class DataBase:
 
         self.cursor = self.conection.cursor()
 
-    def showTables(self):
+    def show_tables(self):
         try:
             self.cursor.execute('SHOW TABLES')
             tables = self.cursor.fetchone()
@@ -20,13 +21,13 @@ class DataBase:
         except Exception as e:
             print(e)
 
-    def createTable(self, name, columns):
+    def create_table(self, name, columns):
         try:
             self.cursor.execute(f'CREATE TABLE {name} ({columns})')
         except Exception as e:
             print(e)
 
-    def deleteTable(self,name):
+    def delete_table(self, name):
         try:
             self.cursor.execute('DROP TABLE ' + name)
         except Exception as e:
@@ -46,7 +47,7 @@ class DataBase:
         except Exception as e:
             print(e)
 
-    def select_with(self,table_name, param, value):
+    def select_with(self, table_name, param, value):
         try:
             self.cursor.execute(f'SELECT * FROM {table_name} WHERE {param}={value}')
             return list(self.cursor.fetchall())
@@ -60,7 +61,7 @@ class DataBase:
         except Exception as e:
             print(e)
 
-    def deleteAll(self,table_name):
+    def delete_all(self, table_name):
         try:
             self.cursor.execute('DELETE FROM ' + table_name)
         except Exception as e:
@@ -69,7 +70,8 @@ class DataBase:
     def close(self):
         self.conection.close()
 
-    def getConection(self):
+    def get_connection(self):
         return self.conection
+
 
 DATABASE = DataBase()

@@ -146,7 +146,7 @@ class BotTelegram:
         update.message.reply_text(msg, reply_markup=keyboard_markup)
 
     def notify(self, msg):
-        for user_id in USERS.get_IDs():
+        for user_id in USERS.get_i_ds():
             self.updater.bot.send_message(user_id, msg)
 
     def diffusion(self, update: Update, _):
@@ -158,7 +158,7 @@ class BotTelegram:
 
     def _diffusion(self, update: Update, _):
         user = USERS.get_user(update.message.chat.id)
-        for user_id in USERS.get_IDs():
+        for user_id in USERS.get_i_ds():
             if user_id != user.id:
                 self.updater.bot.send_message(user_id, update.message.text)
         update.message.reply_text('Message sent')
