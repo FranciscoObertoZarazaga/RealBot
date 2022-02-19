@@ -1,10 +1,10 @@
 from Config import THREADS
-from Klines import Klines
 from Strategy import *
-from Tester import TESTER
+import Tester
 import Telegram
 from time import sleep
 from Trading import *
+from Symbol import *
 
 
 class Bot:
@@ -17,33 +17,35 @@ class Bot:
     def run(self):
         while self.on:
             try:
-                action, down = self.analyze()
+                data = self.get_data()
+                action = self.analyze(data)
                 do(action)
                 status = get_status()
                 self.notify(status)
-                if status and down:
+                if status:
                     all_set_stop_loss()
+                else:
+                    search_asset()
 
                 self.last_status = status
-                TESTER.set_last_activity()
+                Tester.TESTER.set_last_activity()
                 sleep(5)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)
                 exit(-1)
 
-    def analyze(self):
-        self.kl.load()
-        kline = self.kl.get_klines()
-        return squeeze_strategy(kline), kline['sm'][-1] < kline['sm'][-2]
+    @staticmethod
+    def analyze(df):
+        return squeeze_strategy(df)
 
     def notify(self, status):
         if self.last_status is None:
             return 0
         if self.last_status != status:
             if status is True:
-                Telegram.TELEGRAM.notify('El bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+                Telegram.TELEGRAM.notify(f'[{CONFIG.get_symbol()}]\nEl bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
             else:
-                Telegram.TELEGRAM.notify('El bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+                Telegram.TELEGRAM.notify(f'[{CONFIG.get_symbol()}]\nEl bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
 
     def start(self):
         if not THREADS['bot'].is_alive():
@@ -59,6 +61,10 @@ class Bot:
     def restart(self):
         self.stop()
         self.start()
+
+    def get_data(self):
+        self.kl.load()
+        return self.kl.get_klines()
 
 
 BOT = Bot()

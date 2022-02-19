@@ -34,4 +34,7 @@ def do(action):
 
 
 def get_status():
-    return TRADERS[0].get_last_trade()['isBuyer']
+    last_trade = TRADERS[0].get_last_trade()
+    if last_trade is None:
+        return False
+    return last_trade['isBuyer']

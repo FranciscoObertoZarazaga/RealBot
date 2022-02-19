@@ -98,7 +98,7 @@ class BotTelegram:
         Message.delete(update.message)
         state = TESTER.test()['msg']
         resp = update.message.reply_text(state)
-        Thread(target=self.clean, args=(resp, 10)).start()
+        Thread(target=self.clean, args=(resp, 20)).start()
 
     def start(self, update: Update, context: CallbackContext):
         new_id = update.message.chat.id
