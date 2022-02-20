@@ -21,7 +21,7 @@ def all_sell():
 def all_set_stop_loss():
     sell_threads = list()
     for trader in TRADERS:
-        sell_threads.append(Thread(target=trader.set_stop_loss()))
+        sell_threads.append(Thread(target=trader.set_stop_loss))
     for thread in sell_threads:
         thread.start()
 

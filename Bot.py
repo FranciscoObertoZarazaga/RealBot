@@ -24,8 +24,6 @@ class Bot:
                 self.notify(status)
                 if status:
                     all_set_stop_loss()
-                else:
-                    search_asset()
 
                 self.last_status = status
                 Tester.TESTER.set_last_activity()
@@ -36,7 +34,7 @@ class Bot:
 
     @staticmethod
     def analyze(df):
-        return squeeze_strategy(df)
+        return squeeze_buster_strategy(df)
 
     def notify(self, status):
         if self.last_status is None:

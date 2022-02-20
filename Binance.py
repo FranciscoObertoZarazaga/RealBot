@@ -3,6 +3,7 @@ from binance.client import Client
 from binance.enums import *
 from datetime import datetime
 from Config import INTERVAL, CONFIG
+import Telegram
 
 
 API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
@@ -80,7 +81,7 @@ class Binance:
             )
             return True
         except Exception as e:
-            print(e)
+            Telegram.TELEGRAM.notify(str(e))
 
     def sell(self):
         try:
@@ -100,7 +101,7 @@ class Binance:
             )
             return True
         except Exception as e:
-            print(e)
+            Telegram.TELEGRAM.notify(str(e))
 
     def stop_loss(self):
         stop_rate = .98
@@ -134,7 +135,7 @@ class Binance:
                 stopPrice=stop_price
             )
         except Exception as e:
-            print(e)
+            Telegram.TELEGRAM.notify(str(e))
 
     def delete_all_orders(self):
         for order in self.get_all_open_orders():
