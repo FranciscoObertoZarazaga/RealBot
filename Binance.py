@@ -81,7 +81,7 @@ class Binance:
             )
             return True
         except Exception as e:
-            Telegram.TELEGRAM.notify(str(e))
+            Telegram.TELEGRAM.notify('Compra: ' + str(e))
 
     def sell(self):
         try:
@@ -89,7 +89,7 @@ class Binance:
             min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
             precision = len(str(step_size)) - len(str(round(step_size))) - 1
             crypto = self.get_crypto(CONFIG.get_asset())
-            crypto = round(crypto, precision)
+            crypto = round(crypto - step_size, precision)
             if crypto < min_qty:
                 return False
             if crypto > max_qty:
@@ -119,9 +119,11 @@ class Binance:
         limit_price = round(limit_price, precision)
         if stop_price >= max_price or stop_price <= min_price or limit_price >= max_price or limit_price <= min_price:
             return 0
-        precision = len(str(step_size)) - len(str(round(step_size))) - 1
+        precision = len(str(step_size)) - len(str(round(step_size))) + 2
         crypto = self.get_crypto(CONFIG.get_asset())
+        print(crypto)
         crypto = round(crypto, precision)
+        print(crypto)
         if crypto <= min_qty or crypto >= max_qty:
             return 0
         try:

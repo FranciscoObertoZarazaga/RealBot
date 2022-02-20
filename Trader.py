@@ -17,7 +17,6 @@ class Trader:
         if IS_REAL_TRADER:
             if self.binance.buy():
                 self.trades.set_trades()
-                self.set_stop_loss()
 
     def sell(self):
         if IS_REAL_TRADER:

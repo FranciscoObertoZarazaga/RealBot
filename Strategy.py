@@ -12,8 +12,7 @@ def squeeze_strategy(df, n=-1):
 def squeeze_buster_strategy(df, n=-1):
     sm = df['sm']
     up = sm[n] > sm[n - 1]
-    volatility = get_volatility(df)
-    if up and volatility > 0.05:
+    if up:
         return 1
     return -1
 

@@ -23,7 +23,7 @@ class Bot:
                 status = get_status()
                 self.notify(status)
                 if status:
-                    all_set_stop_loss()
+                    pass#all_set_stop_loss()
 
                 self.last_status = status
                 Tester.TESTER.set_last_activity()
