@@ -87,9 +87,9 @@ class Binance:
         try:
             self.delete_all_orders()
             min_qty, max_qty, step_size, min_price, max_price, tick_size = self.get_sell_filters()
-            precision = len(str(step_size)) - len(str(round(step_size))) - 1
             crypto = self.get_crypto(CONFIG.get_asset())
-            crypto = round(crypto - step_size, precision)
+            precision = round(1 / step_size)
+            crypto = int(crypto * precision) / precision
             if crypto < min_qty:
                 return False
             if crypto > max_qty:
