@@ -25,8 +25,10 @@ class Bot:
                 if status:
                     pass#all_set_stop_loss()
 
-                self.last_status = status
                 Tester.TESTER.set_last_activity()
+                if self.last_status != status:
+                    sleep(300)
+                self.last_status = status
                 sleep(5)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)

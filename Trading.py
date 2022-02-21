@@ -1,6 +1,5 @@
 from Trader import TRADERS
 from threading import Thread
-from time import sleep
 
 
 def all_buy():
@@ -32,8 +31,6 @@ def do(action):
         all_buy()
     if action < 0:
         all_sell()
-    if action != 0:
-        sleep(300)
 
 
 def get_status():
