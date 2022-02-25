@@ -20,3 +20,16 @@ def get_volatility(df):
     atr = df['atr'][-1]
     price = df['Close'][-1]
     return atr * 100 / price
+
+def dynamic_stop_loss(status, price, last_price):
+    if status:
+        if last_price is None:
+            return -1
+        if price > last_price:
+            return -1
+    else:
+        if last_price is None:
+            return 1
+        if price < last_price:
+            return 1
+    return 0

@@ -2,28 +2,34 @@ from Trader import TRADERS
 from threading import Thread
 
 
-def all_buy():
-    buy_threads = list()
-    for trader in TRADERS:
-        buy_threads.append(Thread(target=trader.buy))
-    for thread in buy_threads:
-        thread.start()
+def all_do(function):
+    def wrap(*args, **kwargs):
+        buy_threads = list()
+        for trader in TRADERS:
+            function(buy_threads, trader, *args, **kwargs)
+        for thread in buy_threads:
+            thread.start()
+    return wrap
 
 
-def all_sell():
-    sell_threads = list()
-    for trader in TRADERS:
-        sell_threads.append(Thread(target=trader.sell()))
-    for thread in sell_threads:
-        thread.start()
+@all_do
+def all_buy(buy_threads, trader):
+    buy_threads.append(Thread(target=trader.buy))
 
 
-def all_set_stop_loss():
-    sell_threads = list()
-    for trader in TRADERS:
-        sell_threads.append(Thread(target=trader.set_stop_loss))
-    for thread in sell_threads:
-        thread.start()
+@all_do
+def all_sell(sell_threads, trader):
+    sell_threads.append(Thread(target=trader.sell()))
+
+
+@all_do
+def all_set_stop_loss(threads, trader, price):
+    threads.append(Thread(target=trader.set_stop_loss, args=[price]))
+
+
+@all_do
+def all_set_buy_order(threads, trader, price):
+    threads.append(Thread(target=trader.set_buy_order, args=[price]))
 
 
 def do(action):

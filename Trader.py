@@ -23,8 +23,11 @@ class Trader:
             if self.binance.sell():
                 self.trades.set_trades()
 
-    def set_stop_loss(self):
-        self.binance.stop_loss()
+    def set_stop_loss(self, price):
+        self.binance.stop_loss(price)
+
+    def set_buy_order(self, price):
+        self.binance.buy_order(price)
 
     def get_results(self):
         dataframe = self.trades.trades
