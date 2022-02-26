@@ -69,9 +69,9 @@ class Bot:
             self.last_price = price
             self.buy_price = price * (1 + self.rate)
             print('buyprice' , self.buy_price)
-        if price == self.buy_price and not status:
+        if price >= self.buy_price and not status:
             all_buy()
-        if price == self.sell_price and status:
+        if price <= self.sell_price and status:
             all_sell()
 
     @staticmethod
