@@ -12,39 +12,39 @@ class Bot:
         self.kl = Klines()
         self.on = True
         self.last_status = get_status()
-        # New strategy
+        '''# New strategy
         self.rate = .01
         self.last_price = None
         self.buy_price = None
-        self.sell_price = None
+        self.sell_price = None'''
 
     # Main
-    '''def run(self):
+    def run(self):
         while self.on:
             try:
                 data = self.get_data()
                 action = self.analyze(data)
                 do(action)
                 status = get_status()
-                self.notify(status)
+                self.change(status)
                 if status:
-                    pass#all_set_stop_loss()
+                    pass  # all_set_stop_loss()
 
                 Tester.TESTER.set_last_activity()
-                if self.last_status != status and self.last_status is not None:
-                    sleep(300)
                 self.last_status = status
-                sleep(5)
+                sleep(3)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)
-                exit(-1)'''
+                exit(-1)
 
-    def run(self):
+    '''def run(self):
         while self.on:
             try:
                 data = self.get_data()
                 status = get_status()
                 price = self.get_price(data)
+                variation = data['atr'][-1]/price
+                self.rate = .01 if variation < .005 else .005
                 self.change(status)
                 action = dynamic_stop_loss(status, price, self.last_price)
                 self.do(action, price, status)
@@ -54,13 +54,13 @@ class Bot:
                 sleep(5)
             except Exception as e:
                 Telegram.TELEGRAM.notify(e)
-                exit(-1)
+                exit(-1)'''
 
     @staticmethod
     def analyze(df):
-        return squeeze_buster_strategy(df)
+        return NovechentaStrategy(df)
 
-    def do(self, action, price, status):
+    '''def do(self, action, price, status):
         if action == -1:
             self.last_price = price
             self.sell_price = price * (1 - self.rate)
@@ -76,7 +76,7 @@ class Bot:
         if self.sell_price == None:
             return 0
         if price <= self.sell_price and status:
-            all_sell()
+            all_sell()'''
 
     @staticmethod
     def notify(status):
@@ -112,9 +112,6 @@ class Bot:
         if self.last_status is None:
             return False
         if self.has_changed(status):
-            self.last_price = None
-            self.sell_price = None
-            self.buy_price = None
             self.notify(status)
 
     def has_changed(self, status):

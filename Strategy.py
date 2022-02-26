@@ -33,3 +33,19 @@ def dynamic_stop_loss(status, price, last_price):
         if price < last_price:
             return 1
     return 0
+
+def NovechentaStrategy(df, n=-1):
+    adx = df['adx']
+    sm = df['sm']
+
+    #Si el adx alcanza un mínimo o un máximo
+    if (adx[n] < adx[n - 1] and adx[n - 2] < adx[n - 1]) or (adx[n] > adx[n - 1] and adx[n - 2] > adx[n - 1]):
+        #Si el monitor es bajista con direccion alcista
+        if sm[n] > sm[n - 1] and sm[n] < 0:
+            #Compro
+            return 1
+        #Si el monitor es alcista con direccion bajista
+        if sm[n] < sm[n - 1] and sm[n] > 0:
+            #Vendo
+            return -1
+    return 0
