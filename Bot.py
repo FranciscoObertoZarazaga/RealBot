@@ -12,6 +12,7 @@ class Bot:
         self.kl = Klines()
         self.on = True
         self.last_status = get_status()
+        self.best_price = 0
         '''# New strategy
         self.rate = .01
         self.last_price = None
@@ -23,12 +24,15 @@ class Bot:
         while self.on:
             try:
                 data = self.get_data()
+                price = self.get_price(data)
                 action = self.analyze(data)
                 do(action)
                 status = get_status()
                 self.change(status)
                 if status:
-                    pass  # all_set_stop_loss()
+                    if price > self.best_price:
+                        self.best_price = price
+                        all_set_stop_loss(self.best_price)
 
                 Tester.TESTER.set_last_activity()
                 self.last_status = status
@@ -113,6 +117,7 @@ class Bot:
             return False
         if self.has_changed(status):
             self.notify(status)
+            self.best_price = 0
 
     def has_changed(self, status):
         return self.last_status != status
