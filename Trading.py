@@ -44,3 +44,4 @@ def get_status():
     if last_trade is None:
         return False
     return last_trade['isBuyer']
+

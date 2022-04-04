@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="44318f09-3fe0-43cc-9096-9e2cdd80ffc0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/RealBot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RealBot.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Binance.py" beforeDir="false" afterPath="$PROJECT_DIR$/Binance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/Strategy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/Trading.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +63,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\frano\Desktop\RealBot\venv\Scripts\python.exe" />
+      <option name="SDK_HOME" value="C:\Users\frano\AppData\Local\Programs\Python\Python38\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />

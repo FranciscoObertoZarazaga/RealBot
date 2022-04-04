@@ -119,7 +119,7 @@ class Binance:
             Telegram.TELEGRAM.notify(str(e))
             exit(0)
 
-    def stop_loss(self, price, stop_rate=.99):
+    def stop_loss(self, price, stop_rate=.995):
         self.delete_all_orders()
         qty = self.get_crypto_qty()
         self.make_order(price, SIDE_SELL, stop_rate, qty)

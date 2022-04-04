@@ -11,28 +11,26 @@ class Bot:
     def __init__(self):
         self.kl = Klines()
         self.on = True
+        self.data = self.get_data()
         self.last_status = get_status()
         self.best_price = 0
-        '''# New strategy
-        self.rate = .01
-        self.last_price = None
-        self.buy_price = None
-        self.sell_price = None'''
+        self.buy_price = 0
 
     # Main
     def run(self):
         while self.on:
             try:
-                data = self.get_data()
-                price = self.get_price(data)
-                action = self.analyze(data)
+                self.data = self.get_data()
+                price = self.get_price()
+                action = self.analyze()
                 do(action)
                 status = get_status()
                 self.change(status)
                 if status:
                     if price > self.best_price:
                         self.best_price = price
-                        all_set_stop_loss(self.best_price)
+                        if price > self.buy_price * 1.012:
+                            all_set_stop_loss(price)
 
                 Tester.TESTER.set_last_activity()
                 self.last_status = status
@@ -41,46 +39,13 @@ class Bot:
                 Telegram.TELEGRAM.notify(e)
                 exit(-1)
 
-    '''def run(self):
-        while self.on:
-            try:
-                data = self.get_data()
-                status = get_status()
-                price = self.get_price(data)
-                variation = data['atr'][-1]/price
-                self.rate = .01 if variation < .005 else .005
-                self.change(status)
-                action = dynamic_stop_loss(status, price, self.last_price)
-                self.do(action, price, status)
-
-                Tester.TESTER.set_last_activity()
-                self.last_status = status
-                sleep(5)
-            except Exception as e:
-                Telegram.TELEGRAM.notify(e)
-                exit(-1)'''
+    def analyze(self):
+        return good_buy_moment(self.data)
 
     @staticmethod
-    def analyze(df):
-        return NovechentaStrategy(df)
-
-    '''def do(self, action, price, status):
-        if action == -1:
-            self.last_price = price
-            self.sell_price = price * (1 - self.rate)
-            print('sellprice' , self.sell_price)
+    def do(action):
         if action == 1:
-            self.last_price = price
-            self.buy_price = price * (1 + self.rate)
-            print('buyprice' , self.buy_price)
-        if self.buy_price == None:
-            return 0
-        if price >= self.buy_price and not status:
             all_buy()
-        if self.sell_price == None:
-            return 0
-        if price <= self.sell_price and status:
-            all_sell()'''
 
     @staticmethod
     def notify(status):
@@ -108,16 +73,17 @@ class Bot:
         self.kl.load()
         return self.kl.get_klines()
 
-    @staticmethod
-    def get_price(data):
-        return data['Close'][-1]
+    def get_price(self):
+        return self.data['Close'][-1]
 
     def change(self, status):
         if self.last_status is None:
             return False
         if self.has_changed(status):
             self.notify(status)
-            self.best_price = 0
+            if status:
+                self.buy_price = self.get_price()
+                self.best_price = self.buy_price
 
     def has_changed(self, status):
         return self.last_status != status
