@@ -82,7 +82,6 @@ class Binance:
             return True
         except Exception as e:
             Telegram.TELEGRAM.notify('Compra: ' + str(e))
-            exit(0)
 
     def sell(self):
         try:
@@ -98,7 +97,6 @@ class Binance:
             return True
         except Exception as e:
             Telegram.TELEGRAM.notify('Venta: ' + str(e))
-            exit(0)
 
     def make_order(self, price, side, rate, qty=None):
         stop_price = self.get_price(price * rate)
@@ -116,8 +114,7 @@ class Binance:
                 stopPrice=stop_price
             )
         except Exception as e:
-            Telegram.TELEGRAM.notify(str(e))
-            exit(0)
+            Telegram.TELEGRAM.notify('Orden: ' + str(e))
 
     def stop_loss(self, price, stop_rate=.995):
         self.delete_all_orders()
