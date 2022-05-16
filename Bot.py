@@ -27,7 +27,8 @@ class Bot:
                 status = get_status()
                 self.change(status)
                 if status:
-                    assert self.best_price > 0 and self.buy_price > 0, f'(best_price, buy_price)=({self.best_price, self.buy_price}) should be mayor than (0,0)'
+                    self.buy_price = verify_price(self.best_price)
+                    self.best_price = verify_price(self.best_price)
                     if price > self.best_price:
                         self.best_price = price
                         if price > self.buy_price * 1.012:

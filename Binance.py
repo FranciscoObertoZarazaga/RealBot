@@ -209,13 +209,16 @@ class Binance:
         return usdt
 
     def get_price(self, price):
-        min_price, max_price, tick_size = self.get_price_filters()
-        price = self.set_precision(price, tick_size)
-        if price < min_price:
-            return False
-        if price > max_price:
-            return False
-        return price
+        try:
+            min_price, max_price, tick_size = self.get_price_filters()
+            price = self.set_precision(price, tick_size)
+            if price < min_price:
+                return False
+            if price > max_price:
+                return False
+            return price
+        except ConnectionError:
+            self.reconnect()
 
     def set_precision(self, n, p):
         precision = round(1 / p)

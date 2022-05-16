@@ -45,3 +45,24 @@ def get_status():
         return False
     return last_trade['isBuyer']
 
+def get_buy_price():
+    last_trade = TRADERS[0].get_last_trade()
+    if last_trade is None:
+        return 0
+    if last_trade['isBuyer']:
+        return float(last_trade['price'])
+    return 0
+
+def assert_price(price):
+    msg = f'(best_price or buy_price)=({price}) must be mayor than 0'
+    assert price > 0, msg
+
+def verify_price(price):
+    try:
+        assert_price(price)
+        return price
+    except AssertionError:
+        return get_buy_price()
+
+
+
