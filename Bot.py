@@ -46,7 +46,7 @@ class Bot:
 
     @staticmethod
     def do(action):
-        if action == 1:
+        if action == 1 and not get_status():
             all_buy()
 
     @staticmethod
