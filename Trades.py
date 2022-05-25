@@ -36,7 +36,8 @@ class Trades:
                 'time': trade.get_time(),
                 'symbol': trade.symbol
             }
-            data = pd.concat([data, row], ignore_index=True)
+            trade_dataframe = pd.DataFrame(row, columns=row.keys(), index=[0])
+            data = pd.concat([data, trade_dataframe], ignore_index=True)
         return data
 
     @staticmethod

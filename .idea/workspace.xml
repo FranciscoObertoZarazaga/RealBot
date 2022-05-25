@@ -50,14 +50,14 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="RealBot" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="9.2" type="PythonConfigurationType" factoryName="Python">
       <module name="RealBot" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\frano\AppData\Local\Programs\Python\Python38\python.exe" />
+      <option name="SDK_HOME" value="C:\Users\frano\Desktop\TRADING\RealBot\venv9.2\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
