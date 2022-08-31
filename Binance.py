@@ -54,6 +54,34 @@ class Binance:
         return symbols
 
     @catcher
+    def getAllCoinsWith(self, fiat):
+        ticker = self.client.get_all_tickers()
+        coins = list()
+        for symbol in ticker:
+            coin = symbol['symbol']
+            if fiat == coin[-(len(fiat)):]:
+                coins.append(symbol['symbol'].replace(fiat, ''))
+        return coins
+
+    @catcher
+    def getAllCoinsWithUSDT(self):
+        return self.getAllCoinsWith('USDT')
+
+    @catcher
+    def getAllCoinsWithBTC(self):
+        return self.getAllCoinsWith('BTC')
+
+    @catcher
+    def get_symbol_info(self, symbol):
+        return self.client.get_symbol_info(symbol)
+
+    @catcher
+    def get_book_price(self, symbol):
+        order_book = self.client.get_order_book(symbol=symbol, limit="1")
+        #return buy_price, sell_price
+        return float(order_book['asks'][0][0]), float(order_book['bids'][0][0])
+
+    @catcher
     def get_all_coins(self):
         c = self.client.get_all_coins_info()
         coins = list()
@@ -66,39 +94,35 @@ class Binance:
         return float(self.client.get_avg_price(symbol=CONFIG.get_symbol())['price'])
 
     @catcher
-    def get_book_price(self):
-        order_book = self.client.get_order_book(symbol=CONFIG.get_symbol(), limit="1")
-        # return buy_price, sell_price
-        return float(order_book['asks'][0][0]), float(order_book['bids'][0][0])
-
-    @catcher
     def get_k_lines(self, limit, symbol=CONFIG.get_symbol()):
         return self.client.get_klines(symbol=symbol, interval=INTERVAL, limit=limit)
 
     @catcher
-    def buy(self):
+    def buy(self, fiat, coin):
         self.delete_all_orders()
-        usdt = self.get_usdt_qty()
-        if usdt is False:
+        c1 = self.get_crypto_qty(fiat)
+        if c1 is False:
             return False
-        self.client.order_market_buy(
-            symbol=CONFIG.get_symbol(),
-            quoteOrderQty=usdt,
+        info = self.client.order_market_buy(
+            symbol=coin+fiat,
+            quoteOrderQty=fiat,
             newOrderRespType='ACK'
         )
+        print(info)
         return True
 
     @catcher
-    def sell(self):
+    def sell(self, fiat, coin):
         self.delete_all_orders()
-        crypto = self.get_crypto_qty()
+        crypto = self.get_crypto_qty(coin)
         if crypto is False:
             return False
-        self.client.order_market_sell(
-            symbol=CONFIG.get_symbol(),
+        info = self.client.order_market_sell(
+            symbol=coin+fiat,
             quantity=crypto,
             newOrderRespType='ACK'
         )
+        print(info)
         return True
 
     @catcher
@@ -244,6 +268,17 @@ class Binance:
     def set_precision(self, n, p):
         precision = round(1 / p)
         return int((n - p) * precision) / precision
+
+
+    @catcher
+    def is_enable(self, symbol):
+        return self.client.get_symbol_info(symbol)['status'] == 'TRADING'
+
+    @catcher
+    def are_enable(self, symbols, i=0):
+        if len(symbols) == i+1:
+            return self.is_enable(symbols[i])
+        return self.is_enable(symbols[i]) and self.are_enable(symbols, i+1)
 
 
 BINANCE = Binance()

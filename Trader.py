@@ -13,14 +13,14 @@ class Trader:
         self.binance = Binance(api_key=api_key, secret_key=secret_key)
         self.trades = Trades(self.binance, self.id)
 
-    def buy(self):
+    def buy(self, fiat, coin):
         if IS_REAL_TRADER:
-            if self.binance.buy():
+            if self.binance.buy(fiat, coin):
                 self.trades.set_trades()
 
-    def sell(self):
+    def sell(self, fiat, coin):
         if IS_REAL_TRADER:
-            if self.binance.sell():
+            if self.binance.sell(fiat, coin):
                 self.trades.set_trades()
 
     def set_stop_loss(self, price):

@@ -22,7 +22,7 @@ class Config:
         return self._SYMBOL
 
 
-IS_REAL_TRADER = True
+IS_REAL_TRADER = False
 INTERVAL = KLINE_INTERVAL_4HOUR
 THREADS = dict()
 CONFIG = Config()

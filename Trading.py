@@ -13,13 +13,13 @@ def all_do(function):
 
 
 @all_do
-def all_buy(buy_threads, trader):
-    buy_threads.append(Thread(target=trader.buy))
+def all_buy(buy_threads, trader, fiat, coin):
+    buy_threads.append(Thread(target=trader.buy, args=[fiat, coin]))
 
 
 @all_do
-def all_sell(sell_threads, trader):
-    sell_threads.append(Thread(target=trader.sell()))
+def all_sell(sell_threads, trader, fiat, coin):
+    sell_threads.append(Thread(target=trader.sell, args=[fiat, coin]))
 
 
 @all_do
