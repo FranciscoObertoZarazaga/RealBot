@@ -153,6 +153,15 @@ class Binance:
         qty = self.get_crypto_qty(self.get_usdt_qty() / (price * buy_rate ** 2))
         self.make_order(price, SIDE_BUY, buy_rate, qty)
 
+
+    def order_buy_limit(self, price, buy_rate=.95):
+        qty = self.get_crypto_qty(self.get_usdt_qty() / (price * buy_rate ** 2))
+        self.client.order_limit_buy(
+            symbol=CONFIG.get_symbol(),
+            quantity=qty,
+            price=price
+        )
+
     @catcher
     def delete_all_orders(self):
         for order in self.get_all_open_orders():

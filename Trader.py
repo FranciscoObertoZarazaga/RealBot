@@ -4,6 +4,7 @@ from Binance import Binance
 from Trades import Trades
 from Results import Results
 import pandas as pd
+from Wallet import WALLET
 
 
 class Trader:
@@ -24,10 +25,20 @@ class Trader:
                 self.trades.set_trades()
 
     def set_stop_loss(self, price):
-        self.binance.stop_loss(price)
+        if IS_REAL_TRADER:
+            self.binance.stop_loss(price)
 
     def set_buy_order(self, price):
-        self.binance.buy_order(price)
+        if IS_REAL_TRADER:
+            self.binance.buy_order(price)
+        else:
+            WALLET.take_profit(price)
+
+    def set_buy_order_limit(self, price):
+        if IS_REAL_TRADER:
+            self.binance.order_buy_limit(price)
+        else:
+            WALLET.set_buy_limit(price)
 
     def get_results(self):
         dataframe = self.trades.trades

@@ -1,5 +1,7 @@
+import Config
 from Trader import TRADERS
 from threading import Thread
+from Wallet import WALLET
 
 
 def all_do(function):
@@ -31,6 +33,10 @@ def all_set_stop_loss(threads, trader, price):
 def all_set_buy_order(threads, trader, price):
     threads.append(Thread(target=trader.set_buy_order, args=[price]))
 
+@all_do
+def all_set_buy_order_limit(threads, trader, price):
+    threads.append(Thread(target=trader.set_buy_order_limit, args=[price]))
+
 
 def do(action):
     if action > 0:
@@ -40,10 +46,13 @@ def do(action):
 
 
 def get_status():
-    last_trade = TRADERS[0].get_last_trade()
-    if last_trade is None:
-        return False
-    return last_trade['isBuyer']
+    if Config.IS_REAL_TRADER:
+        last_trade = TRADERS[0].get_last_trade()
+        if last_trade is None:
+            return False
+        return last_trade['isBuyer']
+    else:
+        return WALLET.get_status()
 
 def get_buy_price():
     last_trade = TRADERS[0].get_last_trade()

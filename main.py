@@ -1,6 +1,6 @@
 from Config import THREADS
 from Telegram import TELEGRAM
-from TradingTriangular import BOT
+from Bot import BOT
 from Tester import TESTER
 from threading import Thread
 import warnings
