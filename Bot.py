@@ -19,7 +19,6 @@ class Bot:
         self.best_price = 0
         self.worst_price = 0
         self.buy_price = 0
-        TRADER.buy(16750)
 
     # Main
     def run(self):

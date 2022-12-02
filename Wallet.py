@@ -137,7 +137,7 @@ class Wallet:
 
     def update(self, price):
         if self.limit_price is not None:
-            if True:#price < self.limit_price:
+            if price < self.limit_price:
                 self.collect(price)
                 self.limit_price = None
 
