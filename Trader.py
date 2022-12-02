@@ -1,32 +1,33 @@
-from Config import IS_REAL_TRADER
-from DataBase import DATABASE
 from Binance import Binance
 from Trades import Trades
 from Results import Results
-import pandas as pd
 from Wallet import WALLET
+from Config import IS_REAL_TRADER
+from Config import PUBLIC_KEY, SECRET_KEY
 
 
 class Trader:
-    def __init__(self, trader_id, name, api_key, secret_key):
-        self.id = trader_id
-        self.name = name
+    def __init__(self, api_key, secret_key):
         self.binance = Binance(api_key=api_key, secret_key=secret_key)
-        self.trades = Trades(self.binance, self.id)
+        self.trades = Trades(self.binance)
 
-    def buy(self, fiat, coin):
+    def buy(self, price):
         if IS_REAL_TRADER:
-            if self.binance.buy(fiat, coin):
+            if self.binance.buy():
                 self.trades.set_trades()
+        else:
+            WALLET.pay(price)
 
-    def sell(self, fiat, coin):
+    def sell(self):
         if IS_REAL_TRADER:
-            if self.binance.sell(fiat, coin):
+            if self.binance.sell():
                 self.trades.set_trades()
 
     def set_stop_loss(self, price):
         if IS_REAL_TRADER:
             self.binance.stop_loss(price)
+        else:
+            WALLET.take_profit(price)
 
     def set_buy_order(self, price):
         if IS_REAL_TRADER:
@@ -48,38 +49,26 @@ class Trader:
     def get_last_trade(self):
         return self.binance.get_last_trade()
 
+    def get_status(self):
+        if IS_REAL_TRADER:
+            last_trade = self.get_last_trade()
+            if last_trade is None:
+                return False
+            return last_trade['isBuyer']
+        else:
+            return WALLET.get_status()
 
-def get_all_traders():
-    data = DATABASE.select('trader')
-    traders = list()
-    for trader in data:
-        trader_id = trader[0]
-        name = trader[1].strip()
-        api_key = trader[2].strip()
-        secret_key = trader[3].strip()
-        traders.append(Trader(trader_id=trader_id, name=name, api_key=api_key, secret_key=secret_key))
-    return traders
+    def get_buy_price(self):
+        last_trade = self.get_last_trade()
+        if last_trade is None:
+            return 0
+        if last_trade['isBuyer']:
+            return float(last_trade['price'])
+        return 0
 
-
-def get_results():
-    array = list()
-    for trader in TRADERS:
-        data = trader.trades.trades
-        results = str(Results(data))
-        msg = '#' * 25 + f'\nTrader: {trader.name.upper()}\n'
-        msg += results
-        msg += '\n' * 5
-        array.append(msg)
-    return array
+    @staticmethod
+    def update(price):
+        WALLET.update(price)
 
 
-def get_trades():
-    dataframe = pd.DataFrame()
-    for trader in TRADERS:
-        dataframe = pd.concat([dataframe, trader.trades.trades], axis=0, ignore_index=True)
-    path = 'trades.csv'
-    dataframe.to_csv(path)
-    return path
-
-
-TRADERS = get_all_traders()
+TRADER = Trader(PUBLIC_KEY, SECRET_KEY)

@@ -3,11 +3,8 @@ from binance.client import Client
 from binance.enums import *
 from binance.exceptions import *
 from datetime import datetime
-from Config import INTERVAL, CONFIG
-import Telegram
+from Config import INTERVAL, CONFIG, PUBLIC_KEY, SECRET_KEY
 
-API_KEY = "xncgCNincYtvP9UiyHcYDtgaREI4Z34b6Lkoti9odPrCxgnZpQgTGygR6FH2FSzx"
-SECRET_KEY = "nMm5SBvHYLuvmw0GacMruXrH408XWcEEC0CmzHuhhPr2c5UVSNSmYazOYQES6D4H"
 
 def catcher(function):
     def wrapper(self, *args, **kwargs):
@@ -16,19 +13,13 @@ def catcher(function):
         except ConnectionError:
             self.reconnect()
             return function
-        except BinanceAPIException as e:
-            Telegram.TELEGRAM.notify(e)
-            sleep(1)
-        except Exception as e:
-            Telegram.TELEGRAM.notify(e)
-
     return wrapper
 
 
 class Binance:
 
     @catcher
-    def __init__(self, api_key=API_KEY, secret_key=SECRET_KEY):
+    def __init__(self, api_key=PUBLIC_KEY, secret_key=SECRET_KEY):
         self.client = Client(api_key, secret_key)
 
     @catcher
@@ -98,27 +89,27 @@ class Binance:
         return self.client.get_klines(symbol=symbol, interval=INTERVAL, limit=limit)
 
     @catcher
-    def buy(self, fiat, coin):
+    def buy(self):
         self.delete_all_orders()
-        c1 = self.get_crypto_qty(fiat)
+        c1 = self.get_crypto_qty(CONFIG.get_fiat())
         if c1 is False:
             return False
         info = self.client.order_market_buy(
-            symbol=coin+fiat,
-            quoteOrderQty=fiat,
+            symbol=CONFIG.get_symbol(),
+            quoteOrderQty=c1,
             newOrderRespType='ACK'
         )
         print(info)
         return True
 
     @catcher
-    def sell(self, fiat, coin):
+    def sell(self):
         self.delete_all_orders()
-        crypto = self.get_crypto_qty(coin)
+        crypto = self.get_crypto_qty(CONFIG.get_asset())
         if crypto is False:
             return False
         info = self.client.order_market_sell(
-            symbol=coin+fiat,
+            symbol=CONFIG.get_symbol(),
             quantity=crypto,
             newOrderRespType='ACK'
         )

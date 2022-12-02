@@ -3,8 +3,7 @@ from datetime import datetime
 
 
 class Trades:
-    def __init__(self, binance, trader_id):
-        self.trader_id = trader_id
+    def __init__(self, binance):
         self.binance = binance
         self.trades = self._get_trades()
 

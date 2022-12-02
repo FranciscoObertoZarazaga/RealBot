@@ -1,5 +1,4 @@
 from Klines import Klines
-from Strategy import get_volatility
 from Config import CONFIG
 
 ASSETS = ['BTC', 'ETH', 'ADA', 'LTC', 'BNB', 'XRP', 'SOL', 'AVAX', 'DAI', 'DOGE']

@@ -6,6 +6,8 @@ from threading import Thread
 import warnings
 warnings.filterwarnings("ignore")
 
+
+print('Iniciando...')
 THREADS.update({'bot': Thread(target=BOT.run, name='bot')})
 THREADS.update({'telegram': Thread(target=TELEGRAM.run, name='telegram')})
 #THREADS.update({'tester': Thread(target=TESTER.run, name='tester')})

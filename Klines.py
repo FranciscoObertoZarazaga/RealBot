@@ -15,7 +15,8 @@ class Klines:
         self._calculate()
         self.klines.dropna(inplace=True)
 
-    def get_klines(self):
+    def get(self):
+        self.load()
         return self.klines
 
     def _download(self, symbol, limit):
@@ -43,7 +44,6 @@ class Klines:
         self.klines[['Open', 'High', 'Low', 'Close', 'Volume', 'mean']] = self.klines[['Open', 'High', 'Low', 'Close', 'Volume', 'mean']].astype(float)
 
     def _calculate(self):
-        self.klines['sm'] = squeeze_momentum_indicator(self.klines)
-        self.klines['adx'] = adx_indicator(self.klines)
         self.klines['sma'] = sma_indicator(self.klines, 10)
-        self.klines['atr'] = atr_indicator(self.klines)
+
+KLINE = Klines()
