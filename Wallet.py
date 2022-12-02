@@ -1,24 +1,27 @@
 import pandas as pd
-from Binance import Binance
+from Binance import BINANCE
 from datetime import datetime
 from Config import CONFIG
+from json import dumps, dump, load
+
+COINS = BINANCE.get_all_coins()
+TRADES = pd.DataFrame()
 
 
 class Wallet:
-
     def __init__(self):
-        self.binance = Binance()
-        self.coins = self.binance.get_all_coins()
-        self.wallet = dict(zip(self.coins, [0] * len(self.coins)))
-        self.reward = 0
-        self.initial_amount = 100
+        self.load()
+
+    def constructor(self, wallet, reward, initial_amount, buy_amount, buy_price, buy_time, loss, limit_price):
+        self.wallet = wallet
+        self.reward = reward
+        self.initial_amount = initial_amount
         self.addAmount(CONFIG.get_fiat(), self.initial_amount)
-        self.buy_amount = 0
-        self.buy_price = 0
-        self.buy_time = None
-        self.loss = 0
-        self.trades = pd.DataFrame(columns=['final', 'inicial', 'reward'])
-        self.limit_price = None
+        self.buy_amount = buy_amount
+        self.buy_price = buy_price
+        self.buy_time = buy_time
+        self.loss = loss
+        self.limit_price = limit_price
 
     def pay(self, price):
         fiat = CONFIG.get_fiat()
@@ -29,6 +32,7 @@ class Wallet:
         self.addAmount(CONFIG.get_asset(), (self.buy_amount * 0.999) / self.buy_price)
         self.addAmount(fiat, -self.buy_amount)
         self.buy_time = datetime.now()
+        self.save()
         print(self.getAmount("USDT"), self.getAmount("BTC"))
 
     def collect(self, price):
@@ -47,7 +51,7 @@ class Wallet:
                  'buy_time': self.buy_time,
                  'sell_time': datetime.now(),
                  'coin': coin}
-        self.trades = self.trades.append(trade, ignore_index=True, )
+        self.add(trade)
         self.setAmount(coin, 0)
         self.buy_amount = 0
         return self.reward
@@ -62,7 +66,6 @@ class Wallet:
         negative_rate = trades[trades['tasa'] < 0]['tasa'].mean() * 100
         mean_rate = trades['tasa'].mean() * 100
         self.rendimiento = mean_rate * n_trades
-
 
         msg = '=' * 50 + '\n' + "{:^50}".format('RESULTADO') + '\n' + '=' * 50 + '\n'
         print(self.reward, self.loss)
@@ -120,13 +123,13 @@ class Wallet:
     def isPayable(self, coin):
         return self.isPositive(coin)
 
-    def addAmount(self,coin, amount):
+    def addAmount(self, coin, amount):
         self.wallet[coin] += amount
 
     def setAmount(self, coin, amount):
         self.wallet[coin] = amount
 
-    def getAmount(self,coin):
+    def getAmount(self, coin):
         return self.wallet[coin]
 
     def get_status(self):
@@ -141,8 +144,29 @@ class Wallet:
                 self.collect(price)
                 self.limit_price = None
 
+    def add(self, trade):
+        global TRADES
+        TRADES = TRADES.append(trade, ignore_index=True, )
+        self.save()
+
+    def save(self):
+        global TRADES
+        TRADES.to_csv('trades.csv')
+        file = open("wallet.json", "w")
+        dump(dumps(self.__dict__), file, indent=6)
+        file.close()
+
+    def load(self):
+        global TRADES
+        try:
+            TRADES = pd.read_csv('trades.csv')
+            file = open("wallet.json", "r")
+            wallet = load(file)
+            file.close()
+            self.constructor(wallet.wallet, wallet.reward, wallet.initial_amount, wallet.buy_amount, wallet.buy_price, wallet.buy_time, wallet.loss, wallet.limit_price)
+        except:
+            TRADES = pd.DataFrame(columns=['final', 'inicial', 'reward'])
+            self.constructor(dict(zip(COINS, [0] * len(COINS))), 0, 100, 0, 0, None, 0, None)
+
 
 WALLET = Wallet()
-
-
-
