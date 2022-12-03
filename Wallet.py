@@ -1,7 +1,7 @@
 import pandas as pd
 from Binance import BINANCE
 from datetime import datetime
-from Config import CONFIG
+from Config import FIAT, ASSET
 from json import dumps, dump, load
 
 COINS = BINANCE.get_all_coins()
@@ -10,51 +10,49 @@ TRADES = pd.DataFrame()
 
 class Wallet:
     def __init__(self):
+        self.wallet = None
+        self.totalReward = None
+        self.initial_amount = None
+        self.buyAmount = None
+        self.buyPrice = None
+        self.buy_time = None
+        self.totalLoss = None
+        self.limit = None
         self.load()
 
     def constructor(self, wallet, reward, initial_amount, buy_amount, buy_price, buy_time, loss, limit_price):
         self.wallet = wallet
-        self.reward = reward
+        self.totalReward = reward
         self.initial_amount = initial_amount
-        self.addAmount(CONFIG.get_fiat(), self.initial_amount)
-        self.buy_amount = buy_amount
-        self.buy_price = buy_price
+        self.addAmount(FIAT, self.initial_amount)
+        self.buyAmount = buy_amount
+        self.buyPrice = buy_price
         self.buy_time = buy_time
-        self.loss = loss
-        self.limit_price = limit_price
+        self.totalLoss = loss
+        self.limit = limit_price
 
     def pay(self, price):
-        fiat = CONFIG.get_fiat()
-        assert self.isPayable(fiat)
-        self.buy_amount = self.getAmount(fiat)
-        #self.buy_amount = amount if CONFIG.get_fiat() == 'USDT' else amount * self.binance.get_mean(f'{CONFIG.get_fiat}USDT')
-        self.buy_price = price
-        self.addAmount(CONFIG.get_asset(), (self.buy_amount * 0.999) / self.buy_price)
-        self.addAmount(fiat, -self.buy_amount)
+        fiat, asset = FIAT, ASSET
+        assert self.isPositive(fiat)
+        self.buyAmount = self.getAmount(fiat)
+        self.buyPrice = price
+        self.addAmount(asset, (self.buyAmount * 0.999) / self.buyPrice)
+        self.setAmount(fiat, 0)
         self.buy_time = datetime.now()
         self.save()
         print(self.getAmount("USDT"), self.getAmount("BTC"))
 
     def collect(self, price):
-        coin = CONFIG.get_asset()
-        assert self.isPositive(coin)
+        fiat, asset = FIAT, ASSET
+        assert self.isPositive(asset)
         sell_price = price
-        reward = self.getAmount(coin) * sell_price * 0.999 - self.buy_amount
-        self.addAmount(CONFIG.get_fiat(), reward + self.buy_amount)
-        self.reward += reward
-        self.loss += reward if reward < 0 else 0
-        trade = {'final': self.getAmount(CONFIG.get_fiat()),
-                 'inicial': self.buy_amount,
-                 'reward': reward,
-                 'buy_price': self.buy_price,
-                 'sell_price': price,
-                 'buy_time': self.buy_time,
-                 'sell_time': datetime.now(),
-                 'coin': coin}
+        reward = self.getAmount(asset) * sell_price * 0.999 - self.buyAmount
+        self.addAmount(fiat, reward + self.buyAmount)
+        self.totalReward += reward
+        self.totalLoss += reward if reward < 0 else 0
+        trade = self.getTrade(reward, sell_price)
         self.add(trade)
-        self.setAmount(coin, 0)
-        self.buy_amount = 0
-        return self.reward
+        self.setAmount(asset, 0)
 
     def __str__(self):
         trades = self.trades.copy()
@@ -68,13 +66,13 @@ class Wallet:
         self.rendimiento = mean_rate * n_trades
 
         msg = '=' * 50 + '\n' + "{:^50}".format('RESULTADO') + '\n' + '=' * 50 + '\n'
-        print(self.reward, self.loss)
-        ganancia_bruta = self.reward + abs(self.loss)
+        print(self.totalReward, self.totalLoss)
+        ganancia_bruta = self.totalReward + abs(self.totalLoss)
         try:
-            tasa_de_aciertos = 100 * (1 - abs(self.loss) / (abs(self.loss) * 2 + self.reward))
+            tasa_de_aciertos = 100 * (1 - abs(self.totalLoss) / (abs(self.totalLoss) * 2 + self.totalReward))
         except ZeroDivisionError:
             return "NO SE REALIZÓ NINGÚN TRADE."
-        tasa_de_ganancia = (self.getAmount(CONFIG.get_fiat()) / self.initial_amount)
+        tasa_de_ganancia = (self.getAmount(FIAT) / self.initial_amount)
 
         titulo = ['Monto Inicial',
                   'Monto Final',
@@ -93,11 +91,11 @@ class Wallet:
                   'Tasa de Pérdida Promedio',
                   'Rendimiendo']
         valor = [self.initial_amount,
-                 self.getAmount(CONFIG.get_fiat()),
-                 self.getAmount(CONFIG.get_asset()),
+                 self.getAmount(FIAT),
+                 self.getAmount(ASSET),
                  ganancia_bruta,
-                 self.loss,
-                 self.reward,
+                 self.totalLoss,
+                 self.totalReward,
                  tasa_de_aciertos,
                  tasa_de_ganancia,
                  n_trades,
@@ -108,20 +106,17 @@ class Wallet:
                  positive_rate,
                  negative_rate,
                  self.rendimiento]
-        unidad = [CONFIG.get_fiat(), CONFIG.get_fiat(), CONFIG.get_asset(), CONFIG.get_fiat(), CONFIG.get_fiat(), CONFIG.get_fiat(), '%', '', '', '', '', 'N/P', '%', '%', '%', '%']
+        unidad = [FIAT, FIAT, ASSET, FIAT, FIAT, FIAT, '%', '', '', '', '', 'N/P', '%', '%', '%', '%']
         for i, t in enumerate(titulo):
             msg += f'{t:<30}{valor[i]: >10.2f} {unidad[i]: <5}\n'
             msg += '.' * 50 + '\n' if i < len(titulo) - 1 else '=' * 50 + '\n'
         return msg
 
-    def get_reward(self):
-        return self.reward
+    def getTotalReward(self):
+        return self.totalReward
 
     def isPositive(self, coin):
         return self.getAmount(coin) > 0
-
-    def isPayable(self, coin):
-        return self.isPositive(coin)
 
     def addAmount(self, coin, amount):
         self.wallet[coin] += amount
@@ -132,17 +127,17 @@ class Wallet:
     def getAmount(self, coin):
         return self.wallet[coin]
 
-    def get_status(self):
-        return self.getAmount(CONFIG.get_fiat()) == 0
+    def getStatus(self):
+        return self.getAmount(FIAT) == 0
 
-    def take_profit(self, price, disc=.998):
-        self.limit_price = price*disc
+    def setLimit(self, price, disc=.998):
+        self.limit = price * disc
 
     def update(self, price):
-        if self.limit_price is not None:
-            if price < self.limit_price:
+        if self.limit is not None:
+            if price < self.limit:
                 self.collect(price)
-                self.limit_price = None
+                self.limit = None
 
     def add(self, trade):
         global TRADES
@@ -163,10 +158,31 @@ class Wallet:
             file = open("wallet.json", "r")
             wallet = load(file)
             file.close()
-            self.constructor(wallet.wallet, wallet.reward, wallet.initial_amount, wallet.buy_amount, wallet.buy_price, wallet.buy_time, wallet.loss, wallet.limit_price)
-        except:
+            self.constructor(
+                wallet.wallet,
+                wallet.totalReward,
+                wallet.initial_amount,
+                wallet.buyAmount,
+                wallet.buyPrice,
+                wallet.buy_time,
+                wallet.totalLoss,
+                wallet.limit
+            )
+        except FileNotFoundError as e:
             TRADES = pd.DataFrame(columns=['final', 'inicial', 'reward'])
             self.constructor(dict(zip(COINS, [0] * len(COINS))), 0, 100, 0, 0, None, 0, None)
+
+    def getTrade(self, reward, sell_price):
+        return {
+            'final': self.getAmount(FIAT),
+            'inicial': self.buyAmount,
+            'reward': reward,
+            'buy_price': self.buyPrice,
+            'sell_price': sell_price,
+            'buy_time': self.buy_time,
+            'sell_time': datetime.now(),
+            'coin': ASSET
+        }
 
 
 WALLET = Wallet()

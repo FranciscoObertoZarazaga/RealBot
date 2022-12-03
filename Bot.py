@@ -1,9 +1,8 @@
 import Config
-from Config import THREADS, IS_REAL_TRADER
+from Config import THREADS, IS_REAL_TRADER, SYMBOL
 import Tester
 import Telegram
 from time import sleep
-from Symbol import *
 from Binance import BINANCE
 from Trader import TRADER
 from threading import Thread
@@ -15,7 +14,7 @@ from Wallet import WALLET
 class Bot:
     def __init__(self):
         self.on = True
-        self.last_status = TRADER.get_status()
+        self.last_status = TRADER.getStatus()
         self.best_price = 0
         self.worst_price = 0
         self.buy_price = 0
@@ -24,7 +23,7 @@ class Bot:
     def run(self):
         while self.on:
             try:
-                status = TRADER.get_status()
+                status = TRADER.getStatus()
 
                 self.do(status)
                 self.change(status)
@@ -40,7 +39,7 @@ class Bot:
     #Realiza una accion dependiendo del estado actual
     def do(self, status):
         kl = KLINE.get()
-        bid, ask = BINANCE.get_book_price(CONFIG.get_symbol())
+        bid, ask = BINANCE.get_book_price(SYMBOL)
         if not status:
             goBuy = idiot_strategy(kl, bid)
             if goBuy:
@@ -55,9 +54,9 @@ class Bot:
     @staticmethod
     def notify(status):
         if status is True:
-            Telegram.TELEGRAM.notify(f'[{CONFIG.get_symbol()}]\nEl bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+            Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
         else:
-            Telegram.TELEGRAM.notify(f'[{CONFIG.get_symbol()}]\nEl bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+            Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
             Telegram.TELEGRAM.notify(str(WALLET))
 
     # Inicia el Bot
@@ -85,7 +84,7 @@ class Bot:
         if self.has_changed(status):
             self.notify(status)
             if status:
-                self.buy_price = TRADER.get_buy_price() if IS_REAL_TRADER else WALLET.buy_price
+                self.buy_price = TRADER.get_buy_price() if IS_REAL_TRADER else WALLET.buyPrice
                 self.best_price = self.buy_price
 
     # Retorna si el estado ha cambiado
@@ -116,7 +115,7 @@ class Bot:
             self.assert_price(price)
             return price
         except AssertionError:
-            return TRADER.get_buy_price() if IS_REAL_TRADER else WALLET.buy_price
+            return TRADER.get_buy_price() if IS_REAL_TRADER else WALLET.buyPrice
 
 
 BOT = Bot()

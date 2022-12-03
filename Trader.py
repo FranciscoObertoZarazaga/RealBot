@@ -27,13 +27,13 @@ class Trader:
         if IS_REAL_TRADER:
             self.binance.stop_loss(price)
         else:
-            WALLET.take_profit(price)
+            WALLET.setLimit(price)
 
     def set_buy_order(self, price):
         if IS_REAL_TRADER:
             self.binance.buy_order(price)
         else:
-            WALLET.take_profit(price)
+            WALLET.setLimit(price)
 
     def set_buy_order_limit(self, price):
         if IS_REAL_TRADER:
@@ -49,14 +49,14 @@ class Trader:
     def get_last_trade(self):
         return self.binance.get_last_trade()
 
-    def get_status(self):
+    def getStatus(self):
         if IS_REAL_TRADER:
             last_trade = self.get_last_trade()
             if last_trade is None:
                 return False
             return last_trade['isBuyer']
         else:
-            return WALLET.get_status()
+            return WALLET.getStatus()
 
     def get_buy_price(self):
         last_trade = self.get_last_trade()

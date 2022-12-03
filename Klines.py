@@ -2,14 +2,14 @@ from datetime import datetime
 from Binance import BINANCE
 from SqueezeMomentumIndicator import squeeze_momentum_indicator
 from Indicator import *
-from Config import CONFIG
+from Config import SYMBOL
 
 
 class Klines:
     def __init__(self):
         self.klines = pd.DataFrame()
 
-    def load(self, symbol=CONFIG.get_symbol(), limit=41):
+    def load(self, symbol=SYMBOL, limit=41):
         self._download(symbol, limit)
         self.klines = self.klines.set_index('Time')
         self._calculate()

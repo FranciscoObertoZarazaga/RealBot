@@ -3,7 +3,7 @@ from binance.client import Client
 from binance.enums import *
 from binance.exceptions import *
 from datetime import datetime
-from Config import INTERVAL, CONFIG, PUBLIC_KEY, SECRET_KEY
+from Config import INTERVAL, PUBLIC_KEY, SECRET_KEY, SYMBOL, FIAT, ASSET
 
 
 def catcher(function):
@@ -34,7 +34,7 @@ class Binance:
     # El Ask price es el precio mínimo al que un oferente está dispuesto a vender
     @catcher
     def get_order_book(self):
-        return self.client.get_order_book(symbol=CONFIG.get_symbol(), limit="1000")
+        return self.client.get_order_book(symbol=SYMBOL, limit="1000")
 
     @catcher
     def get_all_tickers(self):
@@ -82,20 +82,20 @@ class Binance:
 
     @catcher
     def get_mean(self):
-        return float(self.client.get_avg_price(symbol=CONFIG.get_symbol())['price'])
+        return float(self.client.get_avg_price(symbol=SYMBOL)['price'])
 
     @catcher
-    def get_k_lines(self, limit, symbol=CONFIG.get_symbol()):
+    def get_k_lines(self, limit, symbol=SYMBOL):
         return self.client.get_klines(symbol=symbol, interval=INTERVAL, limit=limit)
 
     @catcher
     def buy(self):
         self.delete_all_orders()
-        c1 = self.get_crypto_qty(CONFIG.get_fiat())
+        c1 = self.get_crypto_qty(FIAT)
         if c1 is False:
             return False
         info = self.client.order_market_buy(
-            symbol=CONFIG.get_symbol(),
+            symbol=SYMBOL,
             quoteOrderQty=c1,
             newOrderRespType='ACK'
         )
@@ -105,11 +105,11 @@ class Binance:
     @catcher
     def sell(self):
         self.delete_all_orders()
-        crypto = self.get_crypto_qty(CONFIG.get_asset())
+        crypto = self.get_crypto_qty(ASSET)
         if crypto is False:
             return False
         info = self.client.order_market_sell(
-            symbol=CONFIG.get_symbol(),
+            symbol=SYMBOL,
             quantity=crypto,
             newOrderRespType='ACK'
         )
@@ -123,7 +123,7 @@ class Binance:
         if not (stop_price * limit_price * qty):
             return False
         self.client.create_order(
-            symbol=CONFIG.get_symbol(),
+            symbol=SYMBOL,
             side=side,
             type=ORDER_TYPE_STOP_LOSS_LIMIT,
             quantity=qty,
@@ -148,7 +148,7 @@ class Binance:
     def order_buy_limit(self, price, buy_rate=.95):
         qty = self.get_crypto_qty(self.get_usdt_qty() / (price * buy_rate ** 2))
         self.client.order_limit_buy(
-            symbol=CONFIG.get_symbol(),
+            symbol=SYMBOL,
             quantity=qty,
             price=price
         )
@@ -158,13 +158,13 @@ class Binance:
         for order in self.get_all_open_orders():
             order_id = order['orderId']
             self.client.cancel_order(
-                symbol=CONFIG.get_symbol(),
+                symbol=SYMBOL,
                 orderId=order_id
             )
 
     @catcher
     def get_all_open_orders(self):
-        return self.client.get_open_orders(symbol=CONFIG.get_symbol())
+        return self.client.get_open_orders(symbol=SYMBOL)
 
     @catcher
     def get_last_stop_price(self):
@@ -196,7 +196,7 @@ class Binance:
 
     @catcher
     def get_filters(self):
-        return self.client.get_symbol_info(symbol=CONFIG.get_symbol())['filters']
+        return self.client.get_symbol_info(symbol=SYMBOL)['filters']
 
     @catcher
     def get_min_notional(self):
@@ -223,7 +223,7 @@ class Binance:
 
     @catcher
     def get_trade(self, trade_id=None, limit=None):
-        return self.client.get_my_trades(symbol=CONFIG.get_symbol(), fromId=trade_id, limit=limit)
+        return self.client.get_my_trades(symbol=SYMBOL, fromId=trade_id, limit=limit)
 
     @catcher
     def get_last_trade(self):
@@ -235,7 +235,7 @@ class Binance:
     @catcher
     def get_crypto_qty(self, crypto=None):
         min_qty, max_qty, step_size = self.get_qty_filters()
-        crypto = self.get_crypto(CONFIG.get_asset()) if crypto is None else crypto
+        crypto = self.get_crypto(ASSET) if crypto is None else crypto
         crypto = self.set_precision(crypto, step_size)
         if crypto < min_qty:
             return False
