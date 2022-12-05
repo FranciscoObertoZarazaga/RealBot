@@ -32,8 +32,7 @@ class Bot:
                 self.last_status = status
                 sleep(1)
             except Exception as e:
-                Telegram.TELEGRAM.notify('Ha ocurrido un error:')
-                Telegram.TELEGRAM.notify(e)
+                Telegram.TELEGRAM.notify(f'Ha ocurrido un error: \n{e}')
                 self.stop()
 
     #Realiza una accion dependiendo del estado actual

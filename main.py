@@ -1,3 +1,5 @@
+import threading
+
 from Config import THREADS
 from Telegram import TELEGRAM
 from Bot import BOT
@@ -7,10 +9,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-print('Iniciando...')
+print('Running...')
 THREADS.update({'bot': Thread(target=BOT.run, name='bot')})
 THREADS.update({'telegram': Thread(target=TELEGRAM.run, name='telegram')})
-#THREADS.update({'tester': Thread(target=TESTER.run, name='tester')})
+#THREADS.update({'tester': Thread(target=TESTER.run, name='tester', daemon=True)})
 
 for thread in THREADS.values():
     thread.start()

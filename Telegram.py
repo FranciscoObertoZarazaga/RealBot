@@ -7,12 +7,12 @@ import Trader
 from threading import Thread
 from tools.singleton import singleton
 from Config import TELEGRAM_ID
+from telegram.error import NetworkError
 
 TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
 ALIAS = 0
 MSG = 0
 CONFIRM = 0
-
 
 @singleton
 class BotTelegram:
@@ -186,5 +186,12 @@ class BotTelegram:
     def fallback_transaction_callback(update, _):
         update.message.reply_text('error')
 
+    def reconnect(self, bot, update, n=True):
+        try:
+            if n is True:
+                print("Reconectando")
+        except ConnectionError:
+            sleep(10)
+            self.reconnect(False)
 
 TELEGRAM = BotTelegram()

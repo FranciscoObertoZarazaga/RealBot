@@ -1,18 +1,22 @@
 from time import sleep
 from binance.client import Client
 from binance.enums import *
-from binance.exceptions import *
+from requests.exceptions import ConnectionError, ReadTimeout
 from datetime import datetime
 from Config import INTERVAL, PUBLIC_KEY, SECRET_KEY, SYMBOL, FIAT, ASSET
+from socket import timeout
 
 
 def catcher(function):
     def wrapper(self, *args, **kwargs):
         try:
             return function(self, *args, **kwargs)
-        except ConnectionError:
+        except (ConnectionError, timeout, ReadTimeout):
             self.reconnect()
-            return function
+            return function(self, *args, **kwargs)
+        except Exception as e:
+            print(e)
+            exit()
     return wrapper
 
 
@@ -186,7 +190,7 @@ class Binance:
             if n is True:
                 print("Reconectando")
             self.get_status()
-        except ConnectionError:
+        except (ConnectionError, timeout, ReadTimeout):
             sleep(10)
             self.reconnect(False)
 
@@ -253,16 +257,13 @@ class Binance:
 
     @catcher
     def get_price(self, price):
-        try:
-            min_price, max_price, tick_size = self.get_price_filters()
-            price = self.set_precision(price, tick_size)
-            if price < min_price:
-                return False
-            if price > max_price:
-                return False
-            return price
-        except ConnectionError:
-            self.reconnect()
+        min_price, max_price, tick_size = self.get_price_filters()
+        price = self.set_precision(price, tick_size)
+        if price < min_price:
+            return False
+        if price > max_price:
+            return False
+        return price
 
     @catcher
     def set_precision(self, n, p):

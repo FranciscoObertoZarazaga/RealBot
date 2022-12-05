@@ -11,6 +11,6 @@ def squeeze_strategy(df, n=-1):
 
 def idiot_strategy(df, price, n=-1):
     mean = df['mean'][n]
-    if mean * 0.99 > price:
+    if mean * 0.995 > price:
         return True
     return False
