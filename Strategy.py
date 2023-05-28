@@ -7,10 +7,3 @@ def squeeze_strategy(df, n=-1):
     if is_max:
         return -1
     return 0
-
-
-def idiot_strategy(df, price, n=-1):
-    mean = df['mean'][n]
-    if mean * 0.995 > price:
-        return True
-    return False

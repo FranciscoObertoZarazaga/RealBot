@@ -7,7 +7,7 @@ from Binance import BINANCE
 from Trader import TRADER
 from threading import Thread
 from Klines import KLINE
-from Strategy import idiot_strategy
+from Strategy import squeeze_strategy
 from Wallet import WALLET
 
 
@@ -30,7 +30,7 @@ class Bot:
 
                 Tester.TESTER.set_last_activity()
                 self.last_status = status
-                sleep(1)
+                sleep(60)
             except Exception as e:
                 Telegram.TELEGRAM.notify(f'Ha ocurrido un error: \n{e}')
                 self.stop()
@@ -40,7 +40,7 @@ class Bot:
         kl = KLINE.get()
         bid, ask = BINANCE.get_book_price(SYMBOL)
         if not status:
-            goBuy = idiot_strategy(kl, bid)
+            goBuy = squeeze_strategy(kl)
             if goBuy:
                 TRADER.buy(bid)
         else:
@@ -92,12 +92,16 @@ class Bot:
 
     # Persigue el precio y toma ganancia
     def take_profit(self, price):
+        profit = .01
+        loss = .05
         self.buy_price = self.verify_price(self.buy_price)
         self.best_price = self.verify_price(self.best_price)
         if price > self.best_price:
             self.best_price = price
-            if price > self.buy_price * 1.004:
-                TRADER.set_stop_loss(price)
+            if price > self.buy_price * (1+profit):
+                TRADER.set_stop_loss(price * (1-profit))
+            else:
+                TRADER.set_stop_loss(price, (1-loss))
 
     '''# Coloca una orden limit de compra por debajo del precio actual
     @staticmethod

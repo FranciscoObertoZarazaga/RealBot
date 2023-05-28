@@ -23,11 +23,11 @@ class Trader:
             if self.binance.sell():
                 self.trades.set_trades()
 
-    def set_stop_loss(self, price):
+    def set_stop_loss(self, price, disc=.998):
         if IS_REAL_TRADER:
             self.binance.stop_loss(price)
         else:
-            WALLET.setLimit(price)
+            WALLET.setLimit(price, disc)
 
     def set_buy_order(self, price):
         if IS_REAL_TRADER:

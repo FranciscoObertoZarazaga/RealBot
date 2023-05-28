@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/venv9.2" />
       <excludeFolder url="file://$MODULE_DIR$/venv2" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (RealBot)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (RealBot)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

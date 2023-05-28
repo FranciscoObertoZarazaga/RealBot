@@ -9,7 +9,7 @@ class Klines:
     def __init__(self):
         self.klines = pd.DataFrame()
 
-    def load(self, symbol=SYMBOL, limit=41):
+    def load(self, symbol=SYMBOL, limit=60):
         self._download(symbol, limit)
         self.klines = self.klines.set_index('Time')
         self._calculate()
@@ -44,6 +44,7 @@ class Klines:
         self.klines[['Open', 'High', 'Low', 'Close', 'Volume', 'mean']] = self.klines[['Open', 'High', 'Low', 'Close', 'Volume', 'mean']].astype(float)
 
     def _calculate(self):
-        self.klines['sma'] = sma_indicator(self.klines, 10)
+        self.klines['sm'] = squeeze_momentum_indicator(self.klines)
+
 
 KLINE = Klines()
