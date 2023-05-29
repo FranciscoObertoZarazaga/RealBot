@@ -103,7 +103,8 @@ class BotTelegram:
         update.message.reply_text(msg, reply_markup=keyboard_markup)
 
     def notify(self, msg):
-        self.updater.bot.send_message(TELEGRAM_ID, msg)
+        for user_id in TELEGRAM_ID:
+            self.updater.bot.send_message(user_id, msg)
 
     '''def results(self, update: Update, _):
         Message.delete(update.message)
