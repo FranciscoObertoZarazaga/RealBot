@@ -1,1 +1,1 @@
-"{\"wallet\": {\"USDT\": 100, \"BTC\": 0}, \"totalReward\": 0, \"initial_amount\": 100, \"buyAmount\": 0, \"buyPrice\": null, \"buy_time\": \null, \"totalLoss\": 0, \"limit\": null}"
+"{\"wallet\": {\"USDT\": 0, \"BTC\": 0.0037051886363830243}, \"totalReward\": 0, \"initial_amount\": 100, \"buyAmount\": 100, \"buyPrice\": 26962.19, \"buy_time\": \"2023-06-01 10:04:55.775979\", \"totalLoss\": 0, \"limit\": null}"
