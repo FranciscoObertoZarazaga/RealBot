@@ -168,7 +168,7 @@ class BotTelegram:
     @staticmethod
     def verify(update):
         user_id = update.message.chat.id
-        if user_id != TELEGRAM_ID:
+        if user_id != TELEGRAM_ID[0]:
             update.message.reply_text("You don't have permission to perform this action")
             return False
         return True

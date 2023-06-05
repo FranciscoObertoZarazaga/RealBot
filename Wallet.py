@@ -143,7 +143,8 @@ class Wallet:
 
     def add(self, trade):
         global TRADES
-        TRADES = TRADES.append(trade, ignore_index=True, )
+        trade = pd.DataFrame(trade)
+        TRADES = pd.concat([TRADES, trade], ignore_index=True)
         self.save()
 
     def save(self):
