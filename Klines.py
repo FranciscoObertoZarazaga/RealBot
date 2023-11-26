@@ -12,7 +12,7 @@ class Klines:
     def load(self, interval, symbol=SYMBOL, limit=60, all=False):
         self._download(symbol, limit, interval, all=all)
         self.klines = self.klines.set_index('Time')
-        self.klines.index = pd.to_datetime(self.klines.index)
+        #self.klines.index = pd.to_datetime(self.klines.index)
         self._calculate()
         self.klines.dropna(inplace=True)
 
