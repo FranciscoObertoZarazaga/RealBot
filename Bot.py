@@ -52,14 +52,6 @@ class Bot:
             TRADER.update(ask)
 
     def backtest(self):
-        file_path = 'wallet.json'
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-        file_path = 'trades.csv'
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
         # Intervalo de mayor duracion
         KLINE.getAll(interval=INTERVALS[0])
         time = KLINE.klines.index[-1] - KLINE.klines.index[0]

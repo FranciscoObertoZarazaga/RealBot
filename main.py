@@ -4,8 +4,16 @@ from Bot import BOT
 from Tester import TESTER
 from threading import Thread
 import warnings
+import os
 warnings.filterwarnings("ignore")
 
+file_path = 'wallet.json'
+if os.path.exists(file_path):
+    os.remove(file_path)
+
+file_path = 'trades.csv'
+if os.path.exists(file_path):
+    os.remove(file_path)
 
 print('Running...')
 
