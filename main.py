@@ -1,6 +1,4 @@
-import threading
-
-from Config import THREADS
+from Config import THREADS, IS_BACKTEST
 from Telegram import TELEGRAM
 from Bot import BOT
 from Tester import TESTER
@@ -10,7 +8,12 @@ warnings.filterwarnings("ignore")
 
 
 print('Running...')
-THREADS.update({'bot': Thread(target=BOT.run, name='bot')})
+
+if IS_BACKTEST:
+    THREADS.update({'bot': Thread(target=BOT.backtest, name='bot')})
+else:
+    THREADS.update({'bot': Thread(target=BOT.run, name='bot')})
+
 THREADS.update({'telegram': Thread(target=TELEGRAM.run, name='telegram')})
 #THREADS.update({'tester': Thread(target=TESTER.run, name='tester', daemon=True)})
 

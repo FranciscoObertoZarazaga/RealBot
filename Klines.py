@@ -9,17 +9,22 @@ class Klines:
     def __init__(self):
         self.klines = pd.DataFrame()
 
-    def load(self, symbol=SYMBOL, limit=60):
-        self._download(symbol, limit)
+    def load(self, interval, symbol=SYMBOL, limit=60, all=False):
+        self._download(symbol, limit, interval, all=all)
         self.klines = self.klines.set_index('Time')
+        self.klines.index = pd.to_datetime(self.klines.index)
         self._calculate()
         self.klines.dropna(inplace=True)
 
-    def get(self):
-        self.load()
+    def get(self, interval):
+        self.load(interval=interval)
         return self.klines
 
-    def _download(self, symbol, limit):
+    def getAll(self, interval):
+        self.load(interval=interval, all=True)
+        return self.klines
+
+    def _download(self, symbol, limit, interval, all):
         columns = [
             'Time',
             'Open',
@@ -35,7 +40,10 @@ class Klines:
             'ignore'
         ]
         times = list()
-        self.klines = pd.DataFrame(BINANCE.get_k_lines(limit=limit, symbol=symbol), columns=columns)
+        if all:
+            self.klines = pd.DataFrame(BINANCE.get_historical_k_lines(interval=interval, symbol=symbol, start_str='2015'), columns=columns)
+        else:
+            self.klines = pd.DataFrame(BINANCE.get_k_lines(limit=limit, interval=interval, symbol=symbol), columns=columns)
         self.klines['times'] = self.klines['Time']
         [times.append(datetime.fromtimestamp(int(str(time))/1000).strftime('%H:%M %d-%m-%Y')) for time in self.klines['Time']]
         self.klines['Time'] = times

@@ -1,4 +1,4 @@
-from Config import THREADS, INTERVAL, IS_REAL_TRADER, SYMBOL, ASSET, FIAT
+from Config import THREADS, INTERVALS, IS_REAL_TRADER, SYMBOL, ASSET, FIAT
 from Binance import BINANCE
 from datetime import datetime
 from time import sleep
@@ -25,7 +25,7 @@ class Tester:
         msg += f'\nBot: {"On" if BOT.on else "Off"}'
         msg += f'\nStatus: {"In" if BOT.last_status else "Out"}'
         msg += f'\nSymbol: {SYMBOL}'
-        msg += f'\nInterval: {INTERVAL}'
+        msg += f'\nInterval: {INTERVALS}'
         msg += f'\nWallet: {BINANCE.get_usdt()} USDT , {BINANCE.get_crypto(ASSET)} {ASSET}' if IS_REAL_TRADER else f'\nWallet: {WALLET.getAmount(FIAT)} {FIAT} , {WALLET.getAmount(ASSET)} {ASSET}'
         diagnostic = {
             'bot_thread': bot_thread,

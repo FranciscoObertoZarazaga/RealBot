@@ -41,7 +41,6 @@ class Wallet:
         self.setAmount(fiat, 0)
         self.buy_time = str(datetime.now())
         self.save()
-        print(FIAT, self.getAmount("USDT"), ASSET, self.getAmount("BTC"))
 
     def collect(self, price):
         fiat, asset = FIAT, ASSET
@@ -143,7 +142,7 @@ class Wallet:
 
     def add(self, trade):
         global TRADES
-        trade = pd.DataFrame(trade)
+        trade = pd.DataFrame(trade, index=[0])
         TRADES = pd.concat([TRADES, trade], ignore_index=True)
         self.save()
 

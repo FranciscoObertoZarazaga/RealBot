@@ -3,7 +3,7 @@ from binance.client import Client
 from binance.enums import *
 from requests.exceptions import ConnectionError, ReadTimeout
 from datetime import datetime
-from Config import INTERVAL, PUBLIC_KEY, SECRET_KEY, SYMBOL, FIAT, ASSET
+from Config import PUBLIC_KEY, SECRET_KEY, SYMBOL, FIAT, ASSET
 from socket import timeout
 
 
@@ -89,8 +89,11 @@ class Binance:
         return float(self.client.get_avg_price(symbol=SYMBOL)['price'])
 
     @catcher
-    def get_k_lines(self, limit, symbol=SYMBOL):
-        return self.client.get_klines(symbol=symbol, interval=INTERVAL, limit=limit)
+    def get_k_lines(self, limit, interval, symbol=SYMBOL):
+        return self.client.get_klines(symbol=symbol, interval=interval, limit=limit)
+
+    def get_historical_k_lines(self,symbol,interval,start_str,end_str=None):
+        return self.client.get_historical_klines(symbol, interval, start_str,end_str)
 
     @catcher
     def buy(self):

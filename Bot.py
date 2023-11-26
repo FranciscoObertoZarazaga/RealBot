@@ -1,5 +1,4 @@
-import Config
-from Config import THREADS, IS_REAL_TRADER, SYMBOL
+from Config import THREADS, IS_REAL_TRADER, SYMBOL, INTERVALS, IS_BACKTEST
 import Tester
 import Telegram
 from time import sleep
@@ -9,6 +8,7 @@ from threading import Thread
 from Klines import KLINE
 from Strategy import squeeze_strategy
 from Wallet import WALLET
+import os
 
 
 class Bot:
@@ -30,33 +30,83 @@ class Bot:
 
                 Tester.TESTER.set_last_activity()
                 self.last_status = status
-                sleep(60)
+                sleep(1)
             except Exception as e:
                 Telegram.TELEGRAM.notify(f'Ha ocurrido un error: \n{e}')
                 self.stop()
 
-    #Realiza una accion dependiendo del estado actual
+    # Realiza una accion dependiendo del estado actual
     def do(self, status):
-        kl = KLINE.get()
         bid, ask = BINANCE.get_book_price(SYMBOL)
         if not status:
-            goBuy = squeeze_strategy(kl)
-            if goBuy:
-                TRADER.buy(bid)
+            for interval in INTERVALS:
+                kl = KLINE.get(interval=interval)
+
+                goBuy = squeeze_strategy(kl)
+                if not goBuy:
+                    return
+
+            TRADER.buy(bid)
         else:
             self.take_profit(ask)
             TRADER.update(ask)
 
+    def backtest(self):
+        file_path = 'wallet.json'
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
+        file_path = 'trades.csv'
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        # Intervalo de mayor duracion
+        KLINE.getAll(interval=INTERVALS[0])
+        time = KLINE.klines.index[-1] - KLINE.klines.index[0]
+        time = int(time.days)
+        years = int(time/365)
+        months = int((time % 365)/30)
+        days = (time % 365) % 30
+        print(f'Tiempo total: {years} years, {months} months, {days} days or {time} days', )
+        for i, kline in enumerate(KLINE.klines.iterrows()):
+            if i < 3:  # 3 klines necesarias para ejecutar la estrategia
+                continue
+
+            status = TRADER.getStatus()
+
+            self.step(status, i)
+            self.change(status)
+
+            Tester.TESTER.set_last_activity()
+            self.last_status = status
+
+        if status:
+            WALLET.collect(KLINE.klines.iloc[len(KLINE.klines) - 1]['High'])
+
+        print(WALLET)
+        print('END')
+
+    # Realiza un paso de backtest
+    def step(self, status, i):
+        kl = KLINE.klines
+        price = kl.iloc[i]['High']
+        if not status:
+            goBuy = squeeze_strategy(kl, i)
+            if goBuy:
+                TRADER.buy(price)
+        else:
+            self.take_profit(price)
+            TRADER.update(price)
 
     # Notifica las operaciones de compra y venta
     @staticmethod
     def notify(status):
-        if status is True:
-            Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
-        else:
-            Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
-            Telegram.TELEGRAM.notify(str(WALLET))
+        if not IS_BACKTEST:
+            if status is True:
+                Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un BUEN momento en el mercado y ha decidido COMPRAR')
+            else:
+                Telegram.TELEGRAM.notify(f'[{SYMBOL}]\nEl bot ha identificado un MAL momento en el mercado y ha decidido VENDER')
+                Telegram.TELEGRAM.notify(str(WALLET))
 
     # Inicia el Bot
     def start(self):
@@ -117,7 +167,7 @@ class Bot:
         try:
             self.assert_price(price)
             return price
-        except AssertionError:
+        except AssertionError as e:
             return TRADER.get_buy_price() if IS_REAL_TRADER else WALLET.buyPrice
 
 
