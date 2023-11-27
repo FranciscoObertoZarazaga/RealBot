@@ -5,5 +5,5 @@ def squeeze_strategy(df, n=-1):
     if is_min:
         return 1
     if is_max:
-        return 0
+        return -1
     return 0

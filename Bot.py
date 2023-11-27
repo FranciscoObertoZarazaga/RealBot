@@ -82,13 +82,15 @@ class Bot:
     def step(self, status, i):
         kl = KLINE.klines
         price = kl.iloc[i]['High']
+        goBuy = squeeze_strategy(kl, i)
         if not status:
-            goBuy = squeeze_strategy(kl, i)
             if goBuy:
                 TRADER.buy(price)
         else:
-            self.take_profit(price)
-            TRADER.update(price)
+            if goBuy == -1:
+                TRADER.sell(price)
+            #self.take_profit(price)
+            #TRADER.update(price)
 
     # Notifica las operaciones de compra y venta
     @staticmethod

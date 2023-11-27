@@ -18,10 +18,12 @@ class Trader:
         else:
             WALLET.pay(price)
 
-    def sell(self):
+    def sell(self, price):
         if IS_REAL_TRADER:
             if self.binance.sell():
                 self.trades.set_trades()
+        else:
+            WALLET.collect(price)
 
     def set_stop_loss(self, price, disc=.998):
         if IS_REAL_TRADER:
