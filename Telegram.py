@@ -9,7 +9,7 @@ from tools.singleton import singleton
 from Config import TELEGRAM_ID
 from telegram.error import NetworkError
 
-TOKEN = '2128072171:AAES8w5dOuYV5e-0TbRq8h7Y6pV1KntEvDg'
+TOKEN = ''  # Telegram Bot Token
 ALIAS = 0
 MSG = 0
 CONFIRM = 0
